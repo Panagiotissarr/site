@@ -1,64 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url>
-	<loc>https://sarris.vercel.app/</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/zen</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/wifi</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/pixel</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/Windows</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/icons/windows</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/icons/Windows</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/icons/categories</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/hackintosh</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/edc-setup</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/cloud</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://sarris.vercel.app/cloud-privacy</loc>
-	<lastmod>2025-12-06T00:00:00+00:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
+
+  <url>
+    <loc>https://sarris.vercel.app/404.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.vercel.app/cloud-privacy.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.vercel.app/cloud.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.vercel.app/edc-setup.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.vercel.app/googlea4a1311321d43415.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.vercel.app/index.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.vercel.app/windows.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>
