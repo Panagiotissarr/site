@@ -1,0 +1,52 @@
+.gravatar-hovercard {
+  --tilt-max: 8deg;
+  --hover-scale: 1.03;
+  --perspective: 1000px;
+  --speed: .12s;
+
+  --rx: 0deg;
+  --ry: 0deg;
+
+  perspective: var(--perspective);
+}
+
+.gravatar-hovercard__inner {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+
+  transform-style: preserve-3d;
+  transform:
+    rotateX(var(--ry))
+    rotateY(var(--rx))
+    scale(1);
+
+  transition:
+    transform var(--speed) ease-out,
+    box-shadow var(--speed) ease-out;
+
+  box-shadow: 0 20px 40px rgba(0,0,0,.35);
+}
+
+.gravatar-hovercard:hover .gravatar-hovercard__inner {
+  transform:
+    rotateX(var(--ry))
+    rotateY(var(--rx))
+    scale(var(--hover-scale));
+
+  box-shadow: 0 30px 65px rgba(0,0,0,.45);
+}
+
+/* Depth */
+.gravatar-hovercard__header-image { transform: translateZ(10px); }
+.gravatar-hovercard__avatar { transform: translateZ(40px); }
+.gravatar-hovercard__inner > *:not(.gravatar-hovercard__header-image) {
+  transform: translateZ(25px);
+}
+
+/* Banner */
+.gravatar-hovercard__header-image {
+  height: 140px;
+  background-size: cover !important;
+  background-position: center !important;
+}
