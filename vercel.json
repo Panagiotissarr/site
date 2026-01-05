@@ -14,6 +14,21 @@
       "source": "/go/twitter",
       "destination": "https://x.com/Panagiotis0615",
       "statusCode": 302
+    },
+    {
+      "source": "/cloud/3/demo",
+      "destination": "https://cloud-3.vercel.app",
+      "statusCode": 302
+    }
+    {
+      "source": "/cloud/2/demo",
+      "destination": "https://oldcloud-v2.vercel.app",
+      "statusCode": 302
+    }
+    {
+      "source": "/cloud/1/demo",
+      "destination": "https://imgs.search.brave.com/h7eV4WJDOiGGrEMXBXB_gZszKLTheEPsO693WCX5pHQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YTEudGVub3IuY29t/L20vcURqUWRoelRz/eG9BQUFBZC9ncmV5/LWZhY2UuZ2lm.gif",
+      "statusCode": 302
     }
   ]
 }
