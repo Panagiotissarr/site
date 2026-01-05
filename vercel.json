@@ -30,5 +30,15 @@
       "destination": "https://c.tenor.com/qDjQdhzTsxoAAAAd/tenor.gif",
       "statusCode": 302
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/:path*/",
+      "destination": "/:path*/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/:path*.html"
+    }
   ]
 }
