@@ -1,0 +1,19 @@
+{
+  "redirects": [
+    {
+      "source": "/go/discord",
+      "destination": "https://discord.gg/zMhrqXe482",
+      "statusCode": 302
+    },
+    {
+      "source": "/go/github",
+      "destination": "https://github.com/panagiotissarr",
+      "statusCode": 302
+    },
+    {
+      "source": "/go/twitter",
+      "destination": "https://x.com/Panagiotis0615",
+      "statusCode": 302
+    }
+  ]
+}

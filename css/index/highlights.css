@@ -1,0 +1,132 @@
+/* Clean 3-column grid showcase */
+#highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5em;
+    width: 70vw;
+    max-width: 1200px;
+    margin: 2em auto;
+}
+
+.highlight-item {
+    aspect-ratio: 1 / 1;
+    text-decoration: none;
+    border: 0.15em solid var(--text-color);
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--radius-out);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s ease-in-out;
+
+    /* dark theme */
+    @media (prefers-color-scheme: dark) {
+        filter: invert(1);
+        border: 0.15em solid var(--background-color-tr);
+    }
+}
+
+.highlight-item h3 {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    color: black;
+    font-size: 1.15rem;
+    line-height: 1.1;
+}
+
+.highlight-description {
+    position: relative;
+    margin: 0;
+    margin-top: 0.5em !important;
+    padding: 0;
+    background-color: transparent !important;
+    color: #333;
+    font-size: 0.85rem !important;
+    line-height: 1.2;
+    /* text-align: left; */
+}
+
+.highlight-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 10px;
+    padding: 0.7em 1em;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-out);
+}
+
+#cloud {
+    background-image: url("../../assets/img/Thums/Cloud.jpeg");
+}
+#Project-Cearch {
+    background-image: url("../../assets/img/Thums/Search.jpg");
+}
+#edc {
+    background-image: url("https://github.com/Panagiotissarr/sarris.vercel.app/blob/main/assets/img/Thums/edc.jpeg?raw=true");
+}
+#Windows {
+    background-image: url("../../assets/img/Thums/Windows.jpeg");
+}
+#canvas {
+    background-image: url("../../assets/img/Thums/canvas.jpeg");
+}
+#tasks {
+    background-image: url("../../assets/img/Thums/tasks.jpeg");
+}
+#zero {
+    background-image: url("../../assets/img/Thums/zero.jpeg");
+}
+#pixel {
+    background-image: url("../../assets/img/Thums/pixel/pixel.jpeg");
+}
+#foldericons {
+    background-image: url("../../assets/img/Thums/folder.jpeg");
+}
+#calendar {
+    background-image: url("https://imgs.search.brave.com/AUszzBALMl9vDQvrnXsLyY0iU23_iTjbxlqtGIkXEVI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTA4/MTU4OTgzMi9waG90/by9jb21pbmctc29v/bi5qcGc_cz02MTJ4/NjEyJnc9MCZrPTIw/JmM9WlcwNWMzbDNt/bjJINE5hSmZEQndy/U2lGNWFoNTRaMGtZ/TWJldUJZUEtnZz0");
+}
+#more-github {
+    background-image: url("https://raw.githubusercontent.com/Panagiotissarr/sarris.vercel.app/main/assets/img/Thums/github.jpeg");
+
+}
+#website {
+    background-image: url("../../assets/img/Thums/website-source.jpeg");
+}
+#macro {
+    background-image: url("../../assets/img/Thums/keeb.jpeg");
+}
+#menubar {
+    background-image: url("../../assets/img/Thums/menu-bar.jpeg");
+}
+
+.highlight-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    scale: 1.03 !important;
+}
+
+@media screen and (max-width: 1500px) {
+    #highlights {
+        width: 80vw;
+    }
+}
+
+@media screen and (max-width: 1300px) {
+    #highlights {
+        grid-template-columns: repeat(2, 1fr);
+        width: 85vw;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    #highlights {
+        grid-template-columns: 1fr;
+        width: 80vw;
+    }
+}
