@@ -68,7 +68,7 @@
     background-image: url("../../assets/img/Thums/Search.jpg");
 }
 #edc {
-    background-image: url("https://github.com/Panagiotissarr/sarris.vercel.app/blob/main/assets/img/Thums/edc.jpeg?raw=true");
+    background-image: url("../../assets/img/Thums/edc.jpeg");
 }
 #Windows {
     background-image: url("../../assets/img/Thums/Windows.jpeg");
@@ -89,10 +89,10 @@
     background-image: url("../../assets/img/Thums/folder.jpeg");
 }
 #calendar {
-    background-image: url("https://imgs.search.brave.com/AUszzBALMl9vDQvrnXsLyY0iU23_iTjbxlqtGIkXEVI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTA4/MTU4OTgzMi9waG90/by9jb21pbmctc29v/bi5qcGc_cz02MTJ4/NjEyJnc9MCZrPTIw/JmM9WlcwNWMzbDNt/bjJINE5hSmZEQndy/U2lGNWFoNTRaMGtZ/TWJldUJZUEtnZz0");
+    background-image: url("../../assets/img/Thums/Calandar.jpg");
 }
 #more-github {
-    background-image: url("https://raw.githubusercontent.com/Panagiotissarr/sarris.vercel.app/main/assets/img/Thums/github.jpeg");
+    background-image: url("../../assets/img/Thums/github.jpeg");
 
 }
 #website {
