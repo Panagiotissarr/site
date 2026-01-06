@@ -14,7 +14,12 @@
       "source": "/go/twitter",
       "destination": "https://x.com/Panagiotis0615",
       "statusCode": 302
-    },
+    },    
+    {
+      "source": "/go/gravatar",
+      "destination": "https://gravatar.com/panagiotissarr",
+      "statusCode": 302
+    }, 
     {
       "source": "/cloud/3/demo",
       "destination": "https://cloud-3.vercel.app",
