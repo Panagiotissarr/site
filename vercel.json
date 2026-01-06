@@ -21,6 +21,11 @@
       "statusCode": 302
     }, 
     {
+      "source": "/go/gravatar/small",
+      "destination": "https://sarris.vercel.app/gravatar",
+      "statusCode": 302
+    }, 
+    {
       "source": "/cloud/3/demo",
       "destination": "https://cloud-3.vercel.app",
       "statusCode": 302
