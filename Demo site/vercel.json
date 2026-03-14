@@ -1,0 +1,54 @@
+{
+  "redirects": [
+    {
+      "source": "/go/discord",
+      "destination": "https://discord.gg/zMhrqXe482",
+      "statusCode": 302
+    },
+    {
+      "source": "/go/github",
+      "destination": "https://github.com/panagiotissarr",
+      "statusCode": 302
+    },
+    {
+      "source": "/go/twitter",
+      "destination": "https://x.com/Panagiotis0615",
+      "statusCode": 302
+    },    
+    {
+      "source": "/go/gravatar",
+      "destination": "https://gravatar.com/panagiotissarr",
+      "statusCode": 302
+    }, 
+    {
+      "source": "/go/gravatar/small",
+      "destination": "https://sarris.dev/gravatar",
+      "statusCode": 302
+    }, 
+    {
+      "source": "/cloud/3/demo",
+      "destination": "https://cloud-3.vercel.app",
+      "statusCode": 302
+    },
+    {
+      "source": "/cloud/2/demo",
+      "destination": "https://oldcloud-v2.vercel.app",
+      "statusCode": 302
+    },
+    {
+      "source": "/cloud/1/demo",
+      "destination": "https://c.tenor.com/qDjQdhzTsxoAAAAd/tenor.gif",
+      "statusCode": 302
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/:path*/",
+      "destination": "/:path*/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/:path*.html"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "sugar-magic";
+  src: url("/assets/fonts/sugarmagicpersonaluseonly-jemyo.otf")
+    format("opentype");
+  font-display: swap;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-black text-white overflow-x-hidden;
+}
+
+/* Custom cursor shell (Magic UI-inspired) */
+.magic-cursor {
+  @apply fixed top-0 left-0 pointer-events-none z-50 rounded-full border border-white/30 bg-white/5 backdrop-blur-xl transition-transform duration-200 ease-out;
+  width: 3rem;
+  height: 3rem;
+}
+
+.magic-cursor-text {
+  @apply absolute text-xs font-medium text-white/90 px-2 py-1 bg-black/70 rounded-full whitespace-nowrap transition-transform duration-150 ease-out;
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.magic-cursor-text.image-view {
+  @apply bg-black/0 rounded-2xl;
+  width: 280px;
+  height: 190px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
+}
+
+
