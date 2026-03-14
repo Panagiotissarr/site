@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://sarris.dev/404.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.dev/cloud-privacy.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.dev/cloud.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.dev/edc-setup.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.dev/googlea4a1311321d43415.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.dev/index.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://sarris.dev/windows.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>

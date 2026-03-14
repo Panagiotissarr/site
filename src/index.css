@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "sugar-magic";
+  src: url("/assets/fonts/sugarmagicpersonaluseonly-jemyo.otf")
+    format("opentype");
+  font-display: swap;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-black text-white overflow-x-hidden;
+  cursor: none;
+}
+
+a,
+button,
+[role="button"],
+input,
+textarea,
+select,
+label {
+  cursor: none !important;
+}
+
+/* Custom cursor shell */
+.magic-cursor {
+  @apply fixed top-0 left-0 pointer-events-none z-50 rounded-full;
+  width: 3rem;
+  height: 3rem;
+  background: transparent;
+  box-shadow: none;
+  transition: transform 120ms ease-out, background-color 180ms ease-out, border-color 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+.magic-cursor::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #fff;
+  mix-blend-mode: difference;
+  filter: grayscale(1) saturate(0) contrast(400%) brightness(2);
+}
+
+.magic-cursor.magic-cursor--light {
+  border: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+.magic-cursor.magic-cursor--dark {
+  border: 1px solid rgba(0, 0, 0, 0.85);
+}
+
+.magic-cursor-text {
+  @apply absolute text-xs font-medium text-white/90 px-2 py-1 bg-black/70 rounded-full whitespace-nowrap transition-transform duration-150 ease-out;
+  opacity: 0;
+  transform: scale(0.85);
+  mix-blend-mode: normal;
+}
+
+.magic-cursor-text.image-view {
+  @apply bg-black/0 rounded-2xl;
+  width: 280px;
+  height: 190px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
+}
+
+
+/* Now playing equalizer */
+.equalizer-bar {
+  animation: equalizer 1.4s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.equalizer-bar.delay-75 {
+  animation-delay: 0.2s;
+}
+
+.equalizer-bar.delay-150 {
+  animation-delay: 0.4s;
+}
+
+@keyframes equalizer {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Invert showcase thumbnails */
+.showcase-invert {
+  filter: invert(1);
+}
+
+/* Animated title (uiverse-inspired) */
+.uiverse-title {
+  position: relative;
+  display: inline-block;
+  --text-stroke-color: rgba(255, 255, 255, 0.6);
+  --animation-color: #4850e0;
+  letter-spacing: inherit;
+  font-family: "sugar-magic", system-ui, sans-serif;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--text-stroke-color);
+  line-height: 1;
+}
+
+.uiverse-title .uiverse-text {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--text-stroke-color);
+}
+
+.uiverse-title .uiverse-hover {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 0%;
+  overflow: hidden;
+  color: var(--animation-color);
+  transition: width 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
+  -webkit-text-stroke: 1px var(--animation-color);
+}
+
+.uiverse-title:hover .uiverse-hover {
+  width: 100%;
+  filter: drop-shadow(0 0 23px var(--animation-color));
+}
+
+/* Manim-style stroke draw + fill reveal */
+.manim-text {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  overflow: visible;
+  vertical-align: baseline;
+  pointer-events: none;
+}
+
+.manim-text text {
+  font-family: "sugar-magic", system-ui, sans-serif;
+  font-size: 1em;
+  letter-spacing: 0.02em;
+}
+
+.manim-stroke {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.manim-stroke-anim {
+  fill: transparent;
+  stroke: #4850e0;
+  stroke-width: 2.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  opacity: 0;
+}
+
+.manim-fill {
+  fill: #4850e0;
+  opacity: 0;
+}
+
+.manim-wrap {
+  display: inline-block;
+}
+
+.manim-wrap:hover .manim-stroke-anim {
+  opacity: 1;
+  animation: manim-stroke 5s ease forwards;
+}
+
+.manim-wrap:hover .manim-fill {
+  animation: manim-fill 1.4s ease forwards;
+  animation-delay: 0.8s;
+}
+
+@keyframes manim-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes manim-fill {
+  to {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .magic-cursor {
+    display: none !important;
+  }
+
+  body,
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  label {
+    cursor: auto !important;
+  }
+}
