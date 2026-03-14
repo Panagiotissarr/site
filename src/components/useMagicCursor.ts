@@ -7,13 +7,33 @@ export const useMagicCursor = () => {
 
     if (!cursor || !cursorText) return;
 
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let currentX = targetX;
+    let currentY = targetY;
+    let animationFrameId = 0;
+
+    const setCursorPosition = (x: number, y: number) => {
+      const offset = 24;
+      cursor.style.transform = `translate3d(${x - offset}px, ${y - offset}px, 0)`;
+    };
+
+    const animateCursor = () => {
+      const dragDelay = 0.16;
+      currentX += (targetX - currentX) * dragDelay;
+      currentY += (targetY - currentY) * dragDelay;
+
+      setCursorPosition(currentX, currentY);
+      animationFrameId = window.requestAnimationFrame(animateCursor);
+    };
+
+    animationFrameId = window.requestAnimationFrame(animateCursor);
+
     const moveCursor = (e: MouseEvent) => {
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-      const offset = 24; // half of 3rem to center the circle
-      cursor.style.transform = `translate3d(${mouseX - offset}px, ${
-        mouseY - offset
-      }px, 0)`;
+      targetX = mouseX;
+      targetY = mouseY;
 
       if (mouseX > window.innerWidth - cursorText.clientWidth) {
         cursorText.style.left = -cursorText.clientWidth + "px";
@@ -32,7 +52,6 @@ export const useMagicCursor = () => {
       titleText: string | null,
       previewUrl?: string | null
     ) => {
-      if (!cursorText) return;
       const isImage =
         !!previewUrl &&
         /\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(previewUrl);
@@ -57,27 +76,62 @@ export const useMagicCursor = () => {
       }
     };
 
+    const handleHoverEnter = (el: HTMLElement) => {
+      cursor.classList.add("scale-110");
+      const preview = el.getAttribute("data-preview");
+      updateTitle(el.getAttribute("data-title"), preview);
+    };
+
+    const handleHoverLeave = () => {
+      cursor.classList.remove("scale-110");
+      updateTitle(null);
+    };
+
+    const disableInvert = () => {
+      cursor.classList.add("magic-cursor--no-invert");
+    };
+
+    const enableInvert = () => {
+      cursor.classList.remove("magic-cursor--no-invert");
+    };
+
     window.addEventListener("mousemove", moveCursor);
 
-    const hoverables = document.querySelectorAll<HTMLElement>("a, button, .hover-state");
-    hoverables.forEach((el) => {
-      el.addEventListener("mouseenter", () => {
-        cursor.classList.add("scale-110");
-        const preview = el.getAttribute("data-preview");
-        updateTitle(el.getAttribute("data-title"), preview);
-      });
-      el.addEventListener("mouseleave", () => {
-        cursor.classList.remove("scale-110");
-        updateTitle(null);
-      });
+    const hoverables = Array.from(
+      document.querySelectorAll<HTMLElement>("a, button, .hover-state")
+    );
+
+    const hoverHandlers = hoverables.map((el) => {
+      const onEnter = () => handleHoverEnter(el);
+      const onLeave = () => handleHoverLeave();
+      el.addEventListener("mouseenter", onEnter);
+      el.addEventListener("mouseleave", onLeave);
+      return { el, onEnter, onLeave };
+    });
+
+    const noInvertTargets = Array.from(
+      document.querySelectorAll<HTMLElement>("img, video, canvas, .cursor-no-invert")
+    );
+
+    const noInvertHandlers = noInvertTargets.map((el) => {
+      el.addEventListener("mouseenter", disableInvert);
+      el.addEventListener("mouseleave", enableInvert);
+      return el;
     });
 
     return () => {
       window.removeEventListener("mousemove", moveCursor);
-      hoverables.forEach((el) => {
-        el.replaceWith(el.cloneNode(true));
+      window.cancelAnimationFrame(animationFrameId);
+
+      hoverHandlers.forEach(({ el, onEnter, onLeave }) => {
+        el.removeEventListener("mouseenter", onEnter);
+        el.removeEventListener("mouseleave", onLeave);
+      });
+
+      noInvertHandlers.forEach((el) => {
+        el.removeEventListener("mouseenter", disableInvert);
+        el.removeEventListener("mouseleave", enableInvert);
       });
     };
   }, []);
 };
-

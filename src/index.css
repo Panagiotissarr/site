@@ -17,19 +17,40 @@ body,
 
 body {
   @apply bg-black text-white overflow-x-hidden;
+  cursor: none;
 }
 
-/* Custom cursor shell (Magic UI-inspired) */
+a,
+button,
+[role="button"],
+input,
+textarea,
+select,
+label {
+  cursor: none !important;
+}
+
+/* Custom cursor shell */
 .magic-cursor {
-  @apply fixed top-0 left-0 pointer-events-none z-50 rounded-full border border-white/30 bg-white/5 backdrop-blur-xl transition-transform duration-200 ease-out;
+  @apply fixed top-0 left-0 pointer-events-none z-50 rounded-full;
   width: 3rem;
   height: 3rem;
+  background: #fff;
+  mix-blend-mode: difference;
+  box-shadow: 0 0 32px rgba(255, 255, 255, 0.35);
+  transition: transform 120ms ease-out, mix-blend-mode 180ms ease-out;
+}
+
+.magic-cursor.magic-cursor--no-invert {
+  mix-blend-mode: normal;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.75), 0 0 22px rgba(255, 255, 255, 0.3);
 }
 
 .magic-cursor-text {
   @apply absolute text-xs font-medium text-white/90 px-2 py-1 bg-black/70 rounded-full whitespace-nowrap transition-transform duration-150 ease-out;
   opacity: 0;
   transform: scale(0.85);
+  mix-blend-mode: normal;
 }
 
 .magic-cursor-text.image-view {
@@ -41,4 +62,19 @@ body {
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
 }
 
+@media screen and (max-width: 500px) {
+  .magic-cursor {
+    display: none !important;
+  }
 
+  body,
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  label {
+    cursor: auto !important;
+  }
+}
