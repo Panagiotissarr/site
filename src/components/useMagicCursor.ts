@@ -7,13 +7,33 @@ export const useMagicCursor = () => {
 
     if (!cursor || !cursorText) return;
 
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let currentX = targetX;
+    let currentY = targetY;
+    let animationFrameId = 0;
+
+    const setCursorPosition = (x: number, y: number) => {
+      const offset = 24; // half of 3rem to center the circle
+      cursor.style.transform = `translate3d(${x - offset}px, ${y - offset}px, 0)`;
+    };
+
+    const animateCursor = () => {
+      const dragDelay = 0.16; // lower = more delay, higher = snappier
+      currentX += (targetX - currentX) * dragDelay;
+      currentY += (targetY - currentY) * dragDelay;
+
+      setCursorPosition(currentX, currentY);
+      animationFrameId = window.requestAnimationFrame(animateCursor);
+    };
+
+    animationFrameId = window.requestAnimationFrame(animateCursor);
+
     const moveCursor = (e: MouseEvent) => {
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-      const offset = 24; // half of 3rem to center the circle
-      cursor.style.transform = `translate3d(${mouseX - offset}px, ${
-        mouseY - offset
-      }px, 0)`;
+      targetX = mouseX;
+      targetY = mouseY;
 
       if (mouseX > window.innerWidth - cursorText.clientWidth) {
         cursorText.style.left = -cursorText.clientWidth + "px";
@@ -74,10 +94,10 @@ export const useMagicCursor = () => {
 
     return () => {
       window.removeEventListener("mousemove", moveCursor);
+      window.cancelAnimationFrame(animationFrameId);
       hoverables.forEach((el) => {
         el.replaceWith(el.cloneNode(true));
       });
     };
   }, []);
 };
-
