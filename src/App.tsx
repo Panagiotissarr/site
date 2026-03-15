@@ -13,9 +13,14 @@ const AppLayout: React.FC = () => {
 
   return (
     <>
+      <div
+        className="pointer-events-none magic-cursor-bw-layer"
+        id="magic-cursor-bw-layer"
+        aria-hidden="true"
+      />
       <div className="pointer-events-none magic-cursor" id="magic-cursor">
-        <div id="magic-cursor-text" className="magic-cursor-text"></div>
       </div>
+      <div id="magic-cursor-text" className="magic-cursor-text"></div>
       <Outlet />
     </>
   );

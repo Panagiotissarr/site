@@ -1,6 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export const AboutSection: React.FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <section id="about-me" className="space-y-8">
       <h2 className="inline-flex items-center rounded-magic-out bg-white/5 px-4 py-2 text-sm text-primary shadow-md shadow-primary/20">
@@ -35,17 +47,16 @@ Hey there! i am well... Panagiotis! Welcome to my Portfollio.
 
       <div className="flex flex-col gap-6">
         <a
-          href="https://github.com/panagiotissarr"
+          href="https://github.com/panagiotissarr/"
           target="_blank"
           rel="noreferrer"
           className="hover-state inline-flex w-fit self-center"
           data-title="GitHub"
         >
           <img
-            src="https://skillicons.dev/icons?i=arch,linux,bash,windows,apple,python,figma,github,obsidian,photoshop,premiere&theme=dark&perline=15"
-            alt="My skills"
+            src={`https://skillicons.dev/icons?i=arch,windows,apple,python,figma,github,obsidian,photoshop,premiere,vercel,vscode,neovim&theme=dark&perline=${isMobile ? "3" : "15"}`}
+            alt="Pana's Skills"
             className="max-w-full rounded-magic-out border border-white/10 bg-black/40 p-2"
-            data-title="GitHub"
           />
         </a>
 

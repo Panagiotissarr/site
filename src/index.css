@@ -30,24 +30,28 @@ label {
   cursor: none !important;
 }
 
+/* Black-and-white layer under cursor so difference blend inverts B&W, not full-color images */
+.magic-cursor-bw-layer {
+  @apply fixed top-0 left-0 rounded-full;
+  width: 3rem;
+  height: 3rem;
+  pointer-events: none;
+  z-index: 49;
+  backdrop-filter: grayscale(1);
+  -webkit-backdrop-filter: grayscale(1);
+  transition: transform 120ms ease-out;
+}
+
 /* Custom cursor shell */
 .magic-cursor {
   @apply fixed top-0 left-0 pointer-events-none z-50 rounded-full;
   width: 3rem;
   height: 3rem;
-  background: transparent;
-  box-shadow: none;
-  transition: transform 120ms ease-out, background-color 180ms ease-out, border-color 180ms ease-out, box-shadow 180ms ease-out;
-}
-
-.magic-cursor::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
   background: #fff;
   mix-blend-mode: difference;
   filter: grayscale(1) saturate(0) contrast(400%) brightness(2);
+  box-shadow: none;
+  transition: transform 120ms ease-out, background-color 180ms ease-out, border-color 180ms ease-out, box-shadow 180ms ease-out;
 }
 
 .magic-cursor.magic-cursor--light {
@@ -59,10 +63,12 @@ label {
 }
 
 .magic-cursor-text {
-  @apply absolute text-xs font-medium text-white/90 px-2 py-1 bg-black/70 rounded-full whitespace-nowrap transition-transform duration-150 ease-out;
+  @apply fixed text-xs font-medium text-white/90 px-2 py-1 bg-black/70 rounded-full whitespace-nowrap transition-transform duration-150 ease-out;
+  z-index: 51;
   opacity: 0;
   transform: scale(0.85);
   mix-blend-mode: normal;
+  transition: transform 150ms ease-out, left 120ms ease-out, top 120ms ease-out, opacity 150ms ease-out;
 }
 
 .magic-cursor-text.image-view {
@@ -182,19 +188,41 @@ label {
   display: inline-block;
 }
 
-.manim-wrap:hover .manim-stroke-anim {
+/* CSS-driven animation only when JS is not used */
+.manim-wrap:not(.manim-js):hover .manim-stroke-anim {
   opacity: 1;
   animation: manim-stroke 5s ease forwards;
 }
 
-.manim-wrap:hover .manim-fill {
+.manim-wrap:not(.manim-js):hover .manim-fill {
   animation: manim-fill 1.4s ease forwards;
   animation-delay: 0.8s;
+}
+
+.manim-wrap:not(.manim-js).manim-leaving .manim-stroke-anim {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  animation: manim-stroke-reverse 5s ease forwards;
+  animation-delay: 1.4s;
+}
+
+.manim-wrap:not(.manim-js).manim-leaving .manim-fill {
+  opacity: 1;
+  animation: manim-fill-reverse 1.4s ease forwards;
 }
 
 @keyframes manim-stroke {
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+@keyframes manim-stroke-reverse {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 1200;
   }
 }
 
@@ -204,7 +232,17 @@ label {
   }
 }
 
+@keyframes manim-fill-reverse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @media screen and (max-width: 500px) {
+  .magic-cursor-bw-layer,
   .magic-cursor {
     display: none !important;
   }

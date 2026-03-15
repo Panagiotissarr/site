@@ -11,10 +11,10 @@ const highlights = [
     preview: "/assets/img/Thums/Cloud-Preview.jpeg"
   },
   {
-    id: "Project-Cearch",
-    title: "Project Cearch",
-    description: "Experimental search experience",
-    href: "https://sarris.dev/Project-Cearch/",
+    id: "seal-ai",
+    title: "Seal AI",
+    description: "An AI companion for your search",
+    href: "https://seal.sarris.dev/",
     thumb: "/assets/img/Thums/Search.jpg",
     preview: "/assets/img/Thums/Search.jpeg"
   },
@@ -35,12 +35,12 @@ const highlights = [
     preview: "/assets/img/Thums/Windows-Preview.jpeg"
   },
   {
-    id: "calendar",
-    title: "Calendar App",
-    description: "A calendar app AI made for me",
-    href: "https://pscalendar.lovable.app/",
-    thumb: "/assets/img/Thums/Calandar.jpg",
-    preview: "/assets/img/Thums/dc-preview.jpg"
+    id: "bookmarklt",
+    title: "Bookmarklt",
+    description: "Save and organize your favorite links",
+    href: "https://bookmarklt.lovable.app/",
+    thumb: "/assets/img/Thums/Bookmarklt.jpg",
+    preview: "/assets/img/Thums/Bookmarklt.jpg"
   },
   {
     id: "more-github",

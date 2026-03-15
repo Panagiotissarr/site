@@ -135,6 +135,7 @@ const getColorLuma = (color: RgbaColor) =>
 export const useMagicCursor = () => {
   useEffect(() => {
     const cursor = document.getElementById("magic-cursor");
+    const cursorBwLayer = document.getElementById("magic-cursor-bw-layer");
     const cursorText = document.getElementById("magic-cursor-text");
 
     if (!cursor || !cursorText) return;
@@ -147,7 +148,9 @@ export const useMagicCursor = () => {
 
     const setCursorPosition = (x: number, y: number) => {
       const offset = 24;
-      cursor.style.transform = `translate3d(${x - offset}px, ${y - offset}px, 0)`;
+      const transform = `translate3d(${x - offset}px, ${y - offset}px, 0)`;
+      cursor.style.transform = transform;
+      if (cursorBwLayer) cursorBwLayer.style.transform = transform;
     };
 
     const darkTarget = { r: 7, g: 7, b: 8 };
@@ -305,6 +308,9 @@ export const useMagicCursor = () => {
       cursor.classList.toggle("magic-cursor--light", isDarkBg);
     };
 
+    const textOffset = 40;
+    const padding = 8;
+
     const animateCursor = () => {
       const dragDelay = 0.16;
       currentX += (targetX - currentX) * dragDelay;
@@ -312,28 +318,34 @@ export const useMagicCursor = () => {
 
       setCursorPosition(currentX, currentY);
       updateCursorTheme(currentX, currentY);
+
+      const w = cursorText.clientWidth;
+      const h = cursorText.clientHeight;
+      const maxX = window.innerWidth - w - padding;
+      const maxY = window.innerHeight - h - padding;
+
+      let nextX = currentX + textOffset;
+      let nextY = currentY + textOffset;
+      if (nextX + w > window.innerWidth - padding) {
+        nextX = currentX - w - textOffset;
+      }
+      if (nextY + h > window.innerHeight - padding) {
+        nextY = currentY - h - textOffset;
+      }
+      nextX = Math.max(padding, Math.min(nextX, maxX));
+      nextY = Math.max(padding, Math.min(nextY, maxY));
+
+      cursorText.style.left = nextX + "px";
+      cursorText.style.top = nextY + "px";
+
       animationFrameId = window.requestAnimationFrame(animateCursor);
     };
 
     animationFrameId = window.requestAnimationFrame(animateCursor);
 
     const moveCursor = (e: MouseEvent) => {
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-      targetX = mouseX;
-      targetY = mouseY;
-
-      if (mouseX > window.innerWidth - cursorText.clientWidth) {
-        cursorText.style.left = -cursorText.clientWidth + "px";
-      } else {
-        cursorText.style.left = "50px";
-      }
-
-      if (mouseY > window.innerHeight - cursorText.clientHeight) {
-        cursorText.style.top = -cursorText.clientHeight + "px";
-      } else {
-        cursorText.style.top = "50px";
-      }
+      targetX = e.clientX;
+      targetY = e.clientY;
     };
 
     const updateTitle = (
@@ -377,26 +389,38 @@ export const useMagicCursor = () => {
 
     window.addEventListener("mousemove", moveCursor);
 
-    const hoverables = Array.from(
-      document.querySelectorAll<HTMLElement>("a, button, .hover-state")
-    );
+    const getHoverable = (target: EventTarget | null): HTMLElement | null => {
+      const el = target as HTMLElement | null;
+      if (!el || !el.closest) return null;
+      return el.closest<HTMLElement>("a, button, .hover-state") ?? null;
+    };
 
-    const hoverHandlers = hoverables.map((el) => {
-      const onEnter = () => handleHoverEnter(el);
-      const onLeave = () => handleHoverLeave();
-      el.addEventListener("mouseenter", onEnter);
-      el.addEventListener("mouseleave", onLeave);
-      return { el, onEnter, onLeave };
-    });
+    let currentHoverable: HTMLElement | null = null;
+
+    const handleDocMouseOver = (e: MouseEvent) => {
+      const hoverable = getHoverable(e.target);
+      if (hoverable && hoverable !== currentHoverable) {
+        currentHoverable = hoverable;
+        handleHoverEnter(hoverable);
+      }
+    };
+
+    const handleDocMouseOut = (e: MouseEvent) => {
+      const hoverable = getHoverable(e.relatedTarget);
+      if (!hoverable || hoverable !== currentHoverable) {
+        currentHoverable = null;
+        handleHoverLeave();
+      }
+    };
+
+    document.addEventListener("mouseover", handleDocMouseOver);
+    document.addEventListener("mouseout", handleDocMouseOut);
 
     return () => {
       window.removeEventListener("mousemove", moveCursor);
+      document.removeEventListener("mouseover", handleDocMouseOver);
+      document.removeEventListener("mouseout", handleDocMouseOut);
       window.cancelAnimationFrame(animationFrameId);
-
-      hoverHandlers.forEach(({ el, onEnter, onLeave }) => {
-        el.removeEventListener("mouseenter", onEnter);
-        el.removeEventListener("mouseleave", onLeave);
-      });
     };
   }, []);
 };

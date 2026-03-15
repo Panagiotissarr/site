@@ -1,8 +1,104 @@
-import React from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import { useNowPlayingSettings } from "../useNowPlayingSettings";
+
+const STROKE_LENGTH = 1200;
+const STROKE_DURATION = 5;
+const FILL_DELAY = 0.8;
+const FILL_DURATION = 1.4;
+const FILL_START_PROGRESS = FILL_DELAY / STROKE_DURATION;
+const FILL_END_PROGRESS = (FILL_DELAY + FILL_DURATION) / STROKE_DURATION;
+
+function easeOut(t: number) {
+  return 1 - (1 - t) * (1 - t);
+}
 
 export const IntroSection: React.FC = () => {
   const { settings } = useNowPlayingSettings();
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  const strokeAnimRef = useRef<SVGTextElement>(null);
+  const fillRef = useRef<SVGTextElement>(null);
+  const progressRef = useRef(0);
+  const rafIdRef = useRef(0);
+  const animRef = useRef({
+    startTime: 0,
+    startProgress: 0,
+    endProgress: 0,
+    duration: 0,
+  });
+
+  const applyProgress = useCallback((progress: number) => {
+    const strokeEl = strokeAnimRef.current;
+    const fillEl = fillRef.current;
+    if (!strokeEl || !fillEl) return;
+    if (progress <= 0) {
+      strokeEl.style.opacity = "";
+      strokeEl.style.strokeDashoffset = "";
+      fillEl.style.opacity = "";
+      return;
+    }
+    strokeEl.style.opacity = "1";
+    strokeEl.style.strokeDashoffset = String(STROKE_LENGTH * (1 - progress));
+    const fillOpacity =
+      progress < FILL_START_PROGRESS
+        ? 0
+        : Math.min(1, (progress - FILL_START_PROGRESS) / (FILL_END_PROGRESS - FILL_START_PROGRESS));
+    fillEl.style.opacity = String(fillOpacity);
+  }, []);
+
+  const tick = useCallback(() => {
+    const now = performance.now() / 1000;
+    const { startTime, startProgress, endProgress, duration } = animRef.current;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / duration);
+    const eased = easeOut(t);
+    const progress = startProgress + (endProgress - startProgress) * eased;
+    progressRef.current = progress;
+    applyProgress(progress);
+    if (t < 1) {
+      rafIdRef.current = requestAnimationFrame(tick);
+    } else {
+      progressRef.current = endProgress;
+      applyProgress(endProgress);
+      if (endProgress === 0) {
+        wrapRef.current?.classList.remove("manim-leaving");
+      }
+    }
+  }, [applyProgress]);
+
+  const handleManimEnter = useCallback(() => {
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    wrapRef.current?.classList.remove("manim-leaving");
+    const start = progressRef.current;
+    const end = 1;
+    const duration = (end - start) * STROKE_DURATION;
+    animRef.current = {
+      startTime: performance.now() / 1000,
+      startProgress: start,
+      endProgress: end,
+      duration: Math.max(0.02, duration),
+    };
+    rafIdRef.current = requestAnimationFrame(tick);
+  }, [tick]);
+
+  const handleManimLeave = useCallback(() => {
+    if (window.matchMedia("(max-width: 768px)").matches) return;
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    wrapRef.current?.classList.add("manim-leaving");
+    const start = progressRef.current;
+    const end = 0;
+    const duration = start * STROKE_DURATION;
+    animRef.current = {
+      startTime: performance.now() / 1000,
+      startProgress: start,
+      endProgress: end,
+      duration: Math.max(0.02, duration),
+    };
+    rafIdRef.current = requestAnimationFrame(tick);
+  }, [tick]);
+
+  useEffect(() => () => {
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+  }, []);
 
   return (
     <section
@@ -49,7 +145,13 @@ export const IntroSection: React.FC = () => {
         <div className="flex w-full flex-col items-end gap-4 text-right">
           <h1 className="font-display text-[clamp(3.5rem,18vw,7rem)] leading-none">
             <span className="block text-right">
-              <span className="manim-wrap">
+              <span
+                ref={wrapRef}
+                className="manim-wrap manim-js"
+                onMouseEnter={handleManimEnter}
+                onMouseLeave={handleManimLeave}
+                onTouchStart={handleManimEnter}
+              >
                 <svg className="manim-text" role="img" aria-label="Sarris">
                   <text
                     className="manim-stroke"
@@ -60,6 +162,7 @@ export const IntroSection: React.FC = () => {
                     Sarris
                   </text>
                   <text
+                    ref={strokeAnimRef}
                     className="manim-stroke-anim"
                     x="100%"
                     y="0.85em"
@@ -68,6 +171,7 @@ export const IntroSection: React.FC = () => {
                     Sarris
                   </text>
                   <text
+                    ref={fillRef}
                     className="manim-fill"
                     x="100%"
                     y="0.85em"
