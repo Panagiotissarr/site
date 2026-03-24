@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { PortfolioPage } from "./components/PortfolioPage";
 import { CloudPage } from "./pages/CloudPage";
 import { EdcSetupPage } from "./pages/EdcSetupPage";
@@ -28,16 +29,19 @@ const AppLayout: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<PortfolioPage />} />
-        <Route path="/cloud" element={<CloudPage />} />
-        <Route path="/edc-setup" element={<EdcSetupPage />} />
-        <Route path="/windows" element={<WindowsSetupPage />} />
-        <Route path="/_now-playing" element={<NowPlayingAdminPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+    <>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<PortfolioPage />} />
+          <Route path="/cloud" element={<CloudPage />} />
+          <Route path="/edc-setup" element={<EdcSetupPage />} />
+          <Route path="/windows" element={<WindowsSetupPage />} />
+          <Route path="/_now-playing" element={<NowPlayingAdminPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+      <Analytics />
+    </>
   );
 };
 
