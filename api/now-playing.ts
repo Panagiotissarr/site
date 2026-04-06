@@ -7,7 +7,8 @@ const defaultSettings = {
   enabled: true,
   label: "Now playing",
   title: "Ambient focus mix",
-  imageUrl: "/assets/img/logo-mini.png"
+  imageUrl: "/assets/img/logo-mini.png",
+  expiresAt: null
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -17,7 +18,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === "GET") {
     try {
-      const settings = (await kv.get(STORAGE_KEY)) || defaultSettings;
+      const settings: any = (await kv.get(STORAGE_KEY)) || defaultSettings;
+      
+      // Auto-disable if expired
+      if (settings.enabled && settings.expiresAt && Date.now() > settings.expiresAt) {
+        settings.enabled = false;
+        settings.expiresAt = null;
+        await kv.set(STORAGE_KEY, settings);
+      }
+      
       return res.status(200).json(settings);
     } catch (error) {
       console.error("KV fetch error:", error);
@@ -26,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
-    const { action, settings } = req.body;
+    const { action, settings, durationMinutes } = req.body;
 
     if (!password || password !== process.env.ADMIN_PASSWORD) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -41,8 +50,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      await kv.set(STORAGE_KEY, settings);
-      return res.status(200).json({ success: true, settings });
+      const newSettings = { ...settings };
+      if (durationMinutes && durationMinutes > 0) {
+        newSettings.expiresAt = Date.now() + durationMinutes * 60 * 1000;
+      } else if (durationMinutes === 0) {
+        newSettings.expiresAt = null;
+      }
+
+      await kv.set(STORAGE_KEY, newSettings);
+      return res.status(200).json({ success: true, settings: newSettings });
     } catch (error) {
       console.error("KV update error:", error);
       return res.status(500).json({ error: "Failed to save settings" });

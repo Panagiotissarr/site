@@ -1,6 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNowPlayingSettings } from "../components/useNowPlayingSettings";
 
+const PRESETS = [
+  { label: "Now playing", title: "Ambient focus mix", imageUrl: "/assets/img/logo-mini.png" },
+  { label: "Now eating", title: "Having a snack", imageUrl: "/assets/img/logo-mini.png" },
+  { label: "Now coding", title: "Working on projects", imageUrl: "/assets/img/logo-mini.png" },
+  { label: "Now gaming", title: "In a session", imageUrl: "/assets/img/logo-mini.png" },
+];
+
+const DURATIONS = [
+  { label: "Permanent", value: 0 },
+  { label: "1 min", value: 1 },
+  { label: "5 min", value: 5 },
+  { label: "10 min", value: 10 },
+  { label: "30 min", value: 30 },
+  { label: "60 min", value: 60 },
+  { label: "Custom", value: -1 },
+];
+
 export const NowPlayingAdminPage: React.FC = () => {
   const { settings, updateSettings, verifyPassword, isLoading } = useNowPlayingSettings();
   const [pin, setPin] = useState("");
@@ -8,6 +25,8 @@ export const NowPlayingAdminPage: React.FC = () => {
   const [safetyLock, setSafetyLock] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [customDuration, setCustomDuration] = useState(120);
   const pinLength = 6;
 
   const formState = useMemo(
@@ -54,11 +73,22 @@ export const NowPlayingAdminPage: React.FC = () => {
     setPin("");
   };
 
+  const applyPreset = (preset: typeof PRESETS[0]) => {
+    setDraft((prev) => ({
+      ...prev,
+      label: preset.label,
+      title: preset.title,
+      imageUrl: preset.imageUrl,
+      enabled: true
+    }));
+  };
+
   const handleSave = async () => {
     setStatus("Saving...");
     try {
-      await updateSettings(draft, pin);
-      setStatus("Saved globally");
+      const finalDuration = duration === -1 ? customDuration : duration;
+      await updateSettings(draft, pin, finalDuration);
+      setStatus("Applied globally");
     } catch (err: any) {
       setStatus(err.message || "Save failed");
     }
@@ -152,7 +182,23 @@ export const NowPlayingAdminPage: React.FC = () => {
               />
             </label>
 
-            <label className="flex items-center justify-between text-sm text-white/70">
+            <div className="space-y-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Presets</label>
+              <div className="flex flex-wrap gap-2">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    onClick={() => applyPreset(p)}
+                    disabled={isDisabled}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 disabled:opacity-50"
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <label className="flex items-center justify-between text-sm text-white/70 pt-2 border-t border-white/5">
               Enable widget
               <input
                 type="checkbox"
@@ -192,16 +238,35 @@ export const NowPlayingAdminPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
-              <input
-                type="text"
-                value={draft.imageUrl}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, imageUrl: e.target.value }))
-                }
-                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
-                disabled={isDisabled}
-              />
+              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Duration</label>
+              <div className="flex flex-wrap gap-2">
+                {DURATIONS.map((d) => (
+                  <button
+                    key={d.label}
+                    onClick={() => setDuration(d.value)}
+                    disabled={isDisabled}
+                    className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                      duration === d.value 
+                        ? "border-primary bg-primary/20 text-white" 
+                        : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              {duration === -1 && (
+                <div className="flex items-center gap-3 pt-2">
+                  <input
+                    type="number"
+                    value={customDuration}
+                    onChange={(e) => setCustomDuration(Number(e.target.value))}
+                    className="w-24 rounded-md border border-white/10 bg-black/40 px-3 py-1 text-sm text-white"
+                    disabled={isDisabled}
+                  />
+                  <span className="text-xs text-white/40">minutes</span>
+                </div>
+              )}
             </div>
 
             <button

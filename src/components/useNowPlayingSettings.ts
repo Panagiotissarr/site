@@ -5,13 +5,15 @@ export type NowPlayingSettings = {
   label: string;
   title: string;
   imageUrl: string;
+  expiresAt?: number | null;
 };
 
 const defaultSettings: NowPlayingSettings = {
   enabled: true,
   label: "Now playing",
   title: "Ambient focus mix",
-  imageUrl: "/assets/img/logo-mini.png"
+  imageUrl: "/assets/img/logo-mini.png",
+  expiresAt: null
 };
 
 export const useNowPlayingSettings = () => {
@@ -23,7 +25,13 @@ export const useNowPlayingSettings = () => {
       const response = await fetch("/api/now-playing");
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        
+        // Frontend check for expiry
+        if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
+          setSettings({ ...data, enabled: false });
+        } else {
+          setSettings(data);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch settings:", error);
@@ -47,13 +55,13 @@ export const useNowPlayingSettings = () => {
     return response.ok;
   };
 
-  const updateSettings = async (next: NowPlayingSettings, password: string) => {
+  const updateSettings = async (next: NowPlayingSettings, password: string, durationMinutes?: number) => {
     const response = await fetch("/api/now-playing", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ password, settings: next })
+      body: JSON.stringify({ password, settings: next, durationMinutes })
     });
 
     if (!response.ok) {
@@ -61,7 +69,8 @@ export const useNowPlayingSettings = () => {
       throw new Error(errorData.error || "Update failed");
     }
 
-    setSettings(next);
+    const data = await response.json();
+    setSettings(data.settings);
   };
 
   return useMemo(

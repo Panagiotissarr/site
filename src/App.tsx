@@ -36,7 +36,7 @@ const App: React.FC = () => {
           <Route path="/cloud" element={<CloudPage />} />
           <Route path="/edc-setup" element={<EdcSetupPage />} />
           <Route path="/windows" element={<WindowsSetupPage />} />
-          <Route path="/_now-playing" element={<NowPlayingAdminPage />} />
+          <Route path="/admin" element={<NowPlayingAdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
