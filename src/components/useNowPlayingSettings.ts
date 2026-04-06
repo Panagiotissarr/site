@@ -6,6 +6,7 @@ export type NowPlayingSettings = {
   title: string;
   imageUrl: string;
   expiresAt?: number | null;
+  showEqualizer?: boolean;
 };
 
 const defaultSettings: NowPlayingSettings = {
@@ -13,7 +14,8 @@ const defaultSettings: NowPlayingSettings = {
   label: "Now playing",
   title: "Ambient focus mix",
   imageUrl: "/assets/img/logo-mini.png",
-  expiresAt: null
+  expiresAt: null,
+  showEqualizer: true
 };
 
 export const useNowPlayingSettings = () => {
@@ -26,6 +28,9 @@ export const useNowPlayingSettings = () => {
       if (response.ok) {
         const data = await response.json();
         
+        // Ensure showEqualizer exists
+        if (data.showEqualizer === undefined) data.showEqualizer = true;
+
         // Frontend check for expiry
         if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
           setSettings({ ...data, enabled: false });

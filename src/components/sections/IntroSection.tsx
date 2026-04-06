@@ -133,11 +133,13 @@ export const IntroSection: React.FC = () => {
                   {settings.title}
                 </span>
               </div>
-              <span className="inline-flex h-6 items-center gap-0.5">
-                <span className="equalizer-bar h-4 w-0.5 bg-emerald-400/80" />
-                <span className="equalizer-bar h-3 w-0.5 bg-emerald-400/60 delay-75" />
-                <span className="equalizer-bar h-5 w-0.5 bg-emerald-400/90 delay-150" />
-              </span>
+              {settings.showEqualizer !== false && (
+                <span className="inline-flex h-6 items-center gap-0.5">
+                  <span className="equalizer-bar h-4 w-0.5 bg-emerald-400/80" />
+                  <span className="equalizer-bar h-3 w-0.5 bg-emerald-400/60 delay-75" />
+                  <span className="equalizer-bar h-5 w-0.5 bg-emerald-400/90 delay-150" />
+                </span>
+              )}
             </div>
           )}
         </div>

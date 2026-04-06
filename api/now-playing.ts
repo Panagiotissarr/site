@@ -8,7 +8,8 @@ const defaultSettings = {
   label: "Now playing",
   title: "Ambient focus mix",
   imageUrl: "/assets/img/logo-mini.png",
-  expiresAt: null
+  expiresAt: null,
+  showEqualizer: true
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -20,6 +21,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const settings: any = (await kv.get(STORAGE_KEY)) || defaultSettings;
       
+      // Ensure showEqualizer exists for older records
+      if (settings.showEqualizer === undefined) settings.showEqualizer = true;
+
       // Auto-disable if expired
       if (settings.enabled && settings.expiresAt && Date.now() > settings.expiresAt) {
         settings.enabled = false;
@@ -53,7 +57,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const newSettings = { ...settings };
       if (durationMinutes && durationMinutes > 0) {
         newSettings.expiresAt = Date.now() + durationMinutes * 60 * 1000;
-      } else if (durationMinutes === 0) {
+      } else if (durationMinutes === 0 || durationMinutes === -2) {
+        // 0 is "Permanent" in old logic, -2 is explicit "Never Expires"
         newSettings.expiresAt = null;
       }
 

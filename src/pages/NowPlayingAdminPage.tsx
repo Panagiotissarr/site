@@ -9,7 +9,7 @@ const PRESETS = [
 ];
 
 const DURATIONS = [
-  { label: "Permanent", value: 0 },
+  { label: "Never Expires", value: -2 },
   { label: "1 min", value: 1 },
   { label: "5 min", value: 5 },
   { label: "10 min", value: 10 },
@@ -25,7 +25,7 @@ export const NowPlayingAdminPage: React.FC = () => {
   const [safetyLock, setSafetyLock] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(-2);
   const [customDuration, setCustomDuration] = useState(120);
   const pinLength = 6;
 
@@ -34,7 +34,8 @@ export const NowPlayingAdminPage: React.FC = () => {
       enabled: settings.enabled,
       label: settings.label,
       title: settings.title,
-      imageUrl: settings.imageUrl
+      imageUrl: settings.imageUrl,
+      showEqualizer: settings.showEqualizer ?? true
     }),
     [settings]
   );
@@ -44,6 +45,18 @@ export const NowPlayingAdminPage: React.FC = () => {
   useEffect(() => {
     setDraft(formState);
   }, [formState]);
+
+  // Auto-lock every 5 minutes (300,000 ms)
+  useEffect(() => {
+    if (unlocked) {
+      const timer = setTimeout(() => {
+        setUnlocked(false);
+        setSafetyLock(true);
+        setStatus("Session expired (Auto-locked)");
+      }, 5 * 60 * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [unlocked]);
 
   const handleUnlock = async () => {
     setIsVerifying(true);
@@ -91,6 +104,16 @@ export const NowPlayingAdminPage: React.FC = () => {
       setStatus("Applied globally");
     } catch (err: any) {
       setStatus(err.message || "Save failed");
+    }
+  };
+
+  const handleSafetyLockToggle = (checked: boolean) => {
+    if (checked) {
+      setUnlocked(false);
+      setSafetyLock(true);
+      setStatus("Locked out by Safety Lock");
+    } else {
+      setSafetyLock(false);
     }
   };
 
@@ -173,11 +196,11 @@ export const NowPlayingAdminPage: React.FC = () => {
         {unlocked && (
           <div className="space-y-4 animate-in fade-in duration-500">
             <label className="flex items-center justify-between text-sm text-white/70">
-              Safety lock
+              Safety lock (Locks you out)
               <input
                 type="checkbox"
                 checked={safetyLock}
-                onChange={(e) => setSafetyLock(e.target.checked)}
+                onChange={(e) => handleSafetyLockToggle(e.target.checked)}
                 className="h-4 w-4 rounded border-white/20 bg-black"
               />
             </label>
@@ -198,18 +221,33 @@ export const NowPlayingAdminPage: React.FC = () => {
               </div>
             </div>
 
-            <label className="flex items-center justify-between text-sm text-white/70 pt-2 border-t border-white/5">
-              Enable widget
-              <input
-                type="checkbox"
-                checked={draft.enabled}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, enabled: e.target.checked }))
-                }
-                className="h-4 w-4 rounded border-white/20 bg-black"
-                disabled={isDisabled}
-              />
-            </label>
+            <div className="flex flex-col gap-3 pt-2 border-t border-white/5">
+                <label className="flex items-center justify-between text-sm text-white/70">
+                  Enable widget
+                  <input
+                    type="checkbox"
+                    checked={draft.enabled}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, enabled: e.target.checked }))
+                    }
+                    className="h-4 w-4 rounded border-white/20 bg-black"
+                    disabled={isDisabled}
+                  />
+                </label>
+
+                <label className="flex items-center justify-between text-sm text-white/70">
+                  Show equalizer animation
+                  <input
+                    type="checkbox"
+                    checked={draft.showEqualizer}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, showEqualizer: e.target.checked }))
+                    }
+                    className="h-4 w-4 rounded border-white/20 bg-black"
+                    disabled={isDisabled}
+                  />
+                </label>
+            </div>
 
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-white/40">Label</label>
@@ -280,7 +318,7 @@ export const NowPlayingAdminPage: React.FC = () => {
         )}
 
         {status && (
-          <p className={`text-center text-xs ${status === "Unauthorized" ? "text-red-400" : "text-white/40"}`}>
+          <p className={`text-center text-xs ${status === "Unauthorized" || status.includes("Locked") ? "text-red-400" : "text-white/40"}`}>
             {status}
           </p>
         )}
