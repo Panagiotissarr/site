@@ -16,17 +16,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const passwordHeader = req.headers['x-admin-password'];
   const bodyPassword = req.body?.password;
   
-  // Normalize both for comparison
   const inputPassword = String(passwordHeader || bodyPassword || "").trim();
   const envPassword = String(process.env.ADMIN_PASSWORD || "").trim();
 
-  // Logging for Vercel Dashboard (Functions -> Logs)
-  // This helps identify if it's a length mismatch or missing env var
-  console.log("Auth Attempt Details:");
-  console.log("- Input length:", inputPassword.length);
-  console.log("- Env Var configured:", !!envPassword);
-  console.log("- Env Var length:", envPassword.length);
-  console.log("- Method:", req.method);
+  // DEBUG LOGS - View these in Vercel Dashboard -> Logs
+  console.log("--- AUTH DEBUG START ---");
+  console.log("Request Method:", req.method);
+  console.log("Env Var exists:", !!process.env.ADMIN_PASSWORD);
+  console.log("Env Var (trimmed) length:", envPassword.length);
+  console.log("Input Password length:", inputPassword.length);
+  
+  // If lengths match but still fails, it's a character mismatch
+  if (inputPassword.length > 0 && envPassword.length > 0) {
+    console.log("Length Match:", inputPassword.length === envPassword.length);
+  }
+  console.log("--- AUTH DEBUG END ---");
 
   if (req.method === "GET") {
     try {
@@ -48,12 +52,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { action, settings, durationMinutes } = req.body;
 
     if (!envPassword) {
-      return res.status(500).json({ error: "ADMIN_PASSWORD not set in Vercel" });
+      return res.status(500).json({ 
+        error: "Server configuration error: ADMIN_PASSWORD is not defined in Vercel environment variables." 
+      });
     }
 
     if (!inputPassword || inputPassword !== envPassword) {
-      console.warn(`Unauthorized attempt: Received length ${inputPassword.length}, Expected ${envPassword.length}`);
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ 
+        error: "Unauthorized",
+        debug: {
+          inputLen: inputPassword.length,
+          expectedLen: envPassword.length,
+          envConfigured: !!envPassword
+        }
+      });
     }
 
     if (action === "verify") {
