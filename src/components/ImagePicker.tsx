@@ -77,7 +77,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
           "x-admin-password": password || ""
         },
         body: JSON.stringify({
-          filename: `google-crop-${Date.now()}.jpg`,
+          filename: `cropped-${Date.now()}.jpg`,
           contentType: "image/jpeg",
           data: croppedBase64
         })
@@ -88,7 +88,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
       onSave(blob.url);
     } catch (err) {
       console.error(err);
-      alert("Error saving image. This can happen if the image source blocks external access (CORS).");
+      alert("Failed to process image. This can happen if the image source blocks external access (CORS).");
     } finally {
       setIsUploading(false);
     }
@@ -97,7 +97,6 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
   const handleSearch = async () => {
     if (!searchTerm) return;
     
-    // If it looks like a URL, use it directly
     if (searchTerm.startsWith("http") || searchTerm.includes(".")) {
       setImgUrl(searchTerm);
       setView("crop");
@@ -106,7 +105,6 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
 
     setIsSearching(true);
     try {
-      // Using Unsplash as the search engine (Google-like experience for high-quality images)
       const res = await fetch(`https://api.unsplash.com/search/photos?query=${searchTerm}&per_page=20&client_id=Y5S78qR_X549E_X97-y6vYVq_o703t6U8E9N-4X0_0E`);
       const data = await res.json();
       setSearchResults(data.results || []);
@@ -118,39 +116,69 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-300 font-sans text-white">
+    <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-300 font-sans text-white cursor-auto !important" >
       {/* Header / Search Bar */}
-      <div className="p-6 border-b border-white/10 flex items-center gap-6 bg-zinc-950">
-        <div className="text-2xl font-bold tracking-tighter flex items-center gap-1">
-          <span className="text-[#4285F4]">G</span>
-          <span className="text-[#EA4335]">o</span>
-          <span className="text-[#FBBC05]">o</span>
-          <span className="text-[#4285F4]">g</span>
-          <span className="text-[#34A853]">l</span>
-          <span className="text-[#EA4335]">e</span>
-          <span className="ml-2 text-sm font-medium text-white/40 uppercase tracking-widest">Images</span>
-        </div>
+      <div className={`p-6 border-b border-white/10 ${searchTerm ? 'flex items-center gap-6 bg-zinc-950' : 'flex flex-col items-center gap-4 bg-zinc-950 w-full'} `}>
         
-        <div className="flex-1 max-w-2xl relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Search for images or paste a direct URL..."
-            className="w-full bg-zinc-900 border border-white/10 rounded-full py-3 px-6 pl-12 text-sm focus:outline-none focus:border-white/30 transition-all"
-          />
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </div>
+        {!searchTerm ? ( // Centered Google-like logo and search bar when empty
+          <div className="flex flex-col items-center gap-4 mb-4">
+            <div className="text-4xl font-bold tracking-tight flex items-center gap-1">
+              <span className="text-[#4285F4]">G</span>
+              <span className="text-[#EA4335]">o</span>
+              <span className="text-[#FBBC05]">o</span>
+              <span className="text-[#4285F4]">g</span>
+              <span className="text-[#34A853]">l</span>
+              <span className="text-[#EA4335]">e</span>
+            </div>
+            <div className="w-full max-w-3xl relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Search for images or paste a direct URL..."
+                className="w-full bg-zinc-900 border border-white/10 rounded-full py-3 px-6 pl-12 text-sm focus:outline-none focus:border-white/30 transition-all"
+              />
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+          </div>
+        ) : ( // Row layout when searching
+          <>
+            <div className="text-2xl font-bold tracking-tighter flex items-center gap-1">
+              <span className="text-[#4285F4]">G</span>
+              <span className="text-[#EA4335]">o</span>
+              <span className="text-[#FBBC05]">o</span>
+              <span className="text-[#4285F4]">g</span>
+              <span className="text-[#34A853]">l</span>
+              <span className="text-[#EA4335]">e</span>
+              <span className="ml-2 text-sm font-medium text-white/40 uppercase tracking-widest">Images</span>
+            </div>
+            
+            <div className="flex-1 max-w-2xl relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Search for images or paste a direct URL..."
+                className="w-full rounded-full py-3 px-6 pl-12 text-sm focus:outline-none focus:border-white/30 transition-all bg-zinc-900 border border-white/10"
+              />
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
 
-        <button onClick={onCancel} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-          <svg className="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+            <button onClick={onCancel} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+              <svg className="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
 
       {/* Main Content Area */}
