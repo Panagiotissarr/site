@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNowPlayingSettings } from "../components/useNowPlayingSettings";
+import { ImagePicker } from "../components/ImagePicker";
 
 const PRESETS = [
   { label: "Now playing", title: "Ambient focus mix", imageUrl: "/assets/img/logo-mini.png" },
@@ -27,6 +28,7 @@ export const NowPlayingAdminPage: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [duration, setDuration] = useState(-2);
   const [customDuration, setCustomDuration] = useState(120);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   const formState = useMemo(
     () => ({
@@ -315,7 +317,20 @@ export const NowPlayingAdminPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
+                <button
+                  onClick={() => setShowImagePicker(true)}
+                  disabled={isDisabled}
+                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white hover:bg-white/10"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  Search & Crop
+                </button>
+              </div>
               <input
                 type="text"
                 value={draft.imageUrl}
@@ -375,6 +390,17 @@ export const NowPlayingAdminPage: React.FC = () => {
           </p>
         )}
       </div>
+
+      {showImagePicker && (
+        <ImagePicker
+          password={pin}
+          onSave={(url) => {
+            setDraft((prev) => ({ ...prev, imageUrl: url }));
+            setShowImagePicker(false);
+          }}
+          onCancel={() => setShowImagePicker(false)}
+        />
+      )}
     </div>
   );
 };
