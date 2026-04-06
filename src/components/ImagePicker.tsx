@@ -10,6 +10,8 @@ interface ImagePickerProps {
   password?: string;
 }
 
+const UNSPLASH_API_KEY = process.env.UNSPLASH_API_KEY; // Use environment variable
+
 export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, password }) => {
   const [imgUrl, setImgUrl] = useState("");
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -20,6 +22,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [view, setView] = useState<"google" | "crop">("google");
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -30,7 +33,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
       const image = new Image();
       image.addEventListener("load", () => resolve(image));
       image.addEventListener("error", (error) => reject(error));
-      image.setAttribute("crossOrigin", "anonymous");
+      image.setAttribute("crossOrigin", "anonymous"); // For CORS
       image.src = url;
     });
 
@@ -58,7 +61,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
 
       return canvas.toDataURL("image/jpeg", 0.9);
     } catch (e) {
-      console.error(e);
+      console.error("Cropping error:", e);
       return null;
     }
   };
@@ -68,7 +71,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
     setIsUploading(true);
     try {
       const croppedBase64 = await getCroppedImg(imgUrl, croppedAreaPixels);
-      if (!croppedBase64) throw new Error("Cropping failed");
+      if (!croppedBase64) throw new Error("Cropping failed: Could not generate image data.");
 
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -83,18 +86,25 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
         })
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
       const blob = await response.json();
       onSave(blob.url);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to process image. This can happen if the image source blocks external access (CORS).");
+      alert(`Failed to process image: ${err.message}. Ensure the image source allows external access (CORS).`);
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleSearch = async () => {
+    setSearchResults([]); // Clear previous results
+    setSearchError(null); // Clear previous search errors
+    
     if (!searchTerm) return;
     
     if (searchTerm.startsWith("http") || searchTerm.includes(".")) {
@@ -103,25 +113,59 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
       return;
     }
 
+    if (!UNSPLASH_API_KEY) {
+      setSearchError("Image search requires an Unsplash API key. Please set UNSPLASH_API_KEY environment variable.");
+      return;
+    }
+
     setIsSearching(true);
     try {
-      const res = await fetch(`https://api.unsplash.com/search/photos?query=${searchTerm}&per_page=20&client_id=Y5S78qR_X549E_X97-y6vYVq_o703t6U8E9N-4X0_0E`);
+      const res = await fetch(`https://api.unsplash.com/search/photos?query=${searchTerm}&per_page=20&client_id=${UNSPLASH_API_KEY}`);
+      
+      if (!res.ok) {
+        const errorInfo = await res.json();
+        throw new Error(`API Error (${res.status}): ${errorInfo.errors ? errorInfo.errors.join(', ') : 'Unknown error'}`);
+      }
+
       const data = await res.json();
       setSearchResults(data.results || []);
-    } catch (err) {
+      if (!data.results || data.results.length === 0) {
+        setSearchError("No results found. Try a different search term.");
+      }
+    } catch (err: any) {
       console.error("Search failed:", err);
+      setSearchError(`Search failed: ${err.message}`);
     } finally {
       setIsSearching(false);
     }
   };
 
+  // Effect to manage cursor visibility
+  useEffect(() => {
+    const modal = document.getElementById('image-picker-modal');
+    if (modal) {
+      // Ensure system cursor is visible inside modal
+      modal.style.cursor = 'auto'; 
+      // Hide custom cursor elements when modal is open
+      document.body.classList.add('modal-open');
+    }
+
+    return () => {
+      // Clean up: remove modal-open class and restore default cursor if needed
+      document.body.classList.remove('modal-open');
+      // The cursor-auto !important on the modal should persist.
+      // If needed, one might need to reset body cursor too, but usually not required.
+    };
+  }, []);
+
+
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-300 font-sans text-white cursor-auto !important" >
+    <div id="image-picker-modal" className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-300 font-sans text-white cursor-auto !important" >
       {/* Header / Search Bar */}
-      <div className={`p-6 border-b border-white/10 ${searchTerm ? 'flex items-center gap-6 bg-zinc-950' : 'flex flex-col items-center gap-4 bg-zinc-950 w-full'} `}>
+      <div className={`p-6 border-b border-white/10 ${searchTerm && searchResults.length > 0 ? 'flex items-center gap-6 bg-zinc-950' : 'flex flex-col items-center gap-4 bg-zinc-950 w-full'} `}>
         
-        {!searchTerm ? ( // Centered Google-like logo and search bar when empty
-          <div className="flex flex-col items-center gap-4 mb-4">
+        {!searchTerm || searchResults.length === 0 ? ( // Centered Google-like logo and search bar when empty or no results
+          <div className={`flex flex-col items-center gap-4 ${searchResults.length === 0 && searchTerm ? 'mb-4' : 'mb-0'} w-full`}>
             <div className="text-4xl font-bold tracking-tight flex items-center gap-1">
               <span className="text-[#4285F4]">G</span>
               <span className="text-[#EA4335]">o</span>
@@ -130,7 +174,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
               <span className="text-[#34A853]">l</span>
               <span className="text-[#EA4335]">e</span>
             </div>
-            <div className="w-full max-w-3xl relative">
+            <div className="w-full max-w-3xl mx-auto relative">
               <input
                 type="text"
                 value={searchTerm}
@@ -145,7 +189,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
               </svg>
             </div>
           </div>
-        ) : ( // Row layout when searching
+        ) : ( // Row layout when searching and results exist
           <>
             <div className="text-2xl font-bold tracking-tighter flex items-center gap-1">
               <span className="text-[#4285F4]">G</span>
@@ -157,7 +201,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
               <span className="ml-2 text-sm font-medium text-white/40 uppercase tracking-widest">Images</span>
             </div>
             
-            <div className="flex-1 max-w-2xl relative">
+            <div className="flex-1 max-w-2xl relative"> {/* Adjusted max-width for search bar */}
               <input
                 type="text"
                 value={searchTerm}
@@ -189,7 +233,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
               <div className="h-full flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-white/40 text-sm font-medium">Searching Google Images...</p>
+                  <p className="text-white/40 text-sm font-medium">Searching...</p>
                 </div>
               </div>
             ) : searchResults.length > 0 ? (
@@ -213,7 +257,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-white/20 italic">
-                {searchTerm ? "No results found. Try another search." : "Enter a search term or URL to get started."}
+                {searchError ? searchError : searchTerm ? "No results found. Please try a different search term or paste a direct image URL." : "Enter a search term or URL to get started."}
               </div>
             )}
           </div>
@@ -223,7 +267,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ onSave, onCancel, pass
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <button 
-                    onClick={() => setView("google")}
+                    onClick={() => { setView("google"); setSearchTerm(""); setSearchResults([]); }} // Clear search state when going back
                     className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
                   >
                     ← Back to Search

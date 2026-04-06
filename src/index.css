@@ -20,6 +20,13 @@ body {
   cursor: none;
 }
 
+/* Hide custom cursor when modal is open */
+body.modal-open .magic-cursor-bw-layer,
+body.modal-open .magic-cursor,
+body.modal-open .magic-cursor-text {
+  display: none !important;
+}
+
 a,
 button,
 [role="button"],
