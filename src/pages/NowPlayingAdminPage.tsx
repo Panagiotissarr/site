@@ -1,20 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNowPlayingSettings } from "../components/useNowPlayingSettings";
 
-const hashPin = async (pin: string) => {
-  const data = new TextEncoder().encode(pin);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-};
-
 export const NowPlayingAdminPage: React.FC = () => {
-  const { settings, updateSettings } = useNowPlayingSettings();
+  const { settings, updateSettings, verifyPassword, isLoading } = useNowPlayingSettings();
   const [pin, setPin] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [safetyLock, setSafetyLock] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
   const pinLength = 6;
 
   const formState = useMemo(
@@ -29,20 +22,27 @@ export const NowPlayingAdminPage: React.FC = () => {
 
   const [draft, setDraft] = useState(formState);
 
+  useEffect(() => {
+    setDraft(formState);
+  }, [formState]);
+
   const handleUnlock = async () => {
-    const hashed = await hashPin(pin);
-    const expected = await hashPin("136013");
-    if (hashed === expected) {
+    setIsVerifying(true);
+    setStatus("Verifying...");
+    const success = await verifyPassword(pin);
+    setIsVerifying(false);
+    
+    if (success) {
       setUnlocked(true);
       setStatus("Unlocked");
       setSafetyLock(false);
     } else {
-      setStatus("Wrong pin");
+      setStatus("Unauthorized");
     }
   };
 
   const handleDigit = (digit: string) => {
-    if (pin.length >= pinLength) return;
+    if (pin.length >= pinLength && pinLength > 0) return;
     setPin((prev) => prev + digit);
   };
 
@@ -54,33 +54,46 @@ export const NowPlayingAdminPage: React.FC = () => {
     setPin("");
   };
 
-  const handleSave = () => {
-    updateSettings(draft);
-    setStatus("Saved");
+  const handleSave = async () => {
+    setStatus("Saving...");
+    try {
+      await updateSettings(draft, pin);
+      setStatus("Saved globally");
+    } catch (err: any) {
+      setStatus(err.message || "Save failed");
+    }
   };
 
-  const isDisabled = !unlocked || safetyLock;
+  const isDisabled = !unlocked || safetyLock || isLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black px-6 py-12 text-white">
-      <div className="mx-auto max-w-xl space-y-6 rounded-magic-out border border-white/10 bg-white/5 p-6">
+    <div className="min-h-screen bg-black px-6 py-12 text-white font-sans">
+      <div className="mx-auto max-w-xl space-y-6 rounded-magic-out border border-white/10 bg-white/5 p-6 backdrop-blur-md">
         <div>
-          <h1 className="text-2xl font-semibold">Now Playing Controls</h1>
+          <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
           <p className="mt-1 text-sm text-white/60">
-            Private panel for changing the now playing widget.
+            Secure panel for real-time website updates.
           </p>
         </div>
 
         {!unlocked && (
           <div className="space-y-3">
-            <label className="text-sm text-white/70">PIN</label>
+            <label className="text-sm text-white/70">Master Password</label>
             <div className="flex items-center justify-center gap-3 py-2">
-              {Array.from({ length: pinLength }).map((_, index) => (
+              {Array.from({ length: Math.max(pin.length, pinLength) }).map((_, index) => (
                 <span
                   key={`dot-${index}`}
-                  className={`h-3 w-3 rounded-full border ${
+                  className={`h-3 w-3 rounded-full border transition-all duration-200 ${
                     index < pin.length
-                      ? "border-primary bg-primary"
+                      ? "border-primary bg-primary scale-110 shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
                       : "border-white/30"
                   }`}
                 />
@@ -92,7 +105,7 @@ export const NowPlayingAdminPage: React.FC = () => {
                 <button
                   key={digit}
                   onClick={() => handleDigit(digit)}
-                  className="h-14 rounded-full border border-white/10 bg-white/5 text-lg font-semibold text-white hover:bg-white/10"
+                  className="h-14 rounded-full border border-white/10 bg-white/5 text-lg font-semibold text-white hover:bg-white/10 active:scale-95 transition-transform"
                 >
                   {digit}
                 </button>
@@ -105,7 +118,7 @@ export const NowPlayingAdminPage: React.FC = () => {
               </button>
               <button
                 onClick={() => handleDigit("0")}
-                className="h-14 rounded-full border border-white/10 bg-white/5 text-lg font-semibold text-white hover:bg-white/10"
+                className="h-14 rounded-full border border-white/10 bg-white/5 text-lg font-semibold text-white hover:bg-white/10 active:scale-95 transition-transform"
               >
                 0
               </button>
@@ -119,22 +132,23 @@ export const NowPlayingAdminPage: React.FC = () => {
 
             <button
               onClick={handleUnlock}
-              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white"
+              disabled={isVerifying}
+              className="w-full rounded-md bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 disabled:opacity-50"
             >
-              Unlock
+              {isVerifying ? "Verifying..." : "Unlock"}
             </button>
           </div>
         )}
 
         {unlocked && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-in fade-in duration-500">
             <label className="flex items-center justify-between text-sm text-white/70">
               Safety lock
               <input
                 type="checkbox"
                 checked={safetyLock}
                 onChange={(e) => setSafetyLock(e.target.checked)}
-                className="h-4 w-4"
+                className="h-4 w-4 rounded border-white/20 bg-black"
               />
             </label>
 
@@ -146,55 +160,65 @@ export const NowPlayingAdminPage: React.FC = () => {
                 onChange={(e) =>
                   setDraft((prev) => ({ ...prev, enabled: e.target.checked }))
                 }
-                className="h-4 w-4"
+                className="h-4 w-4 rounded border-white/20 bg-black"
                 disabled={isDisabled}
               />
             </label>
 
-            <label className="text-sm text-white/70">Label</label>
-            <input
-              type="text"
-              value={draft.label}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, label: e.target.value }))
-              }
-              className="w-full rounded-md border border-white/10 bg-black/60 px-3 py-2 text-white"
-              disabled={isDisabled}
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Label</label>
+              <input
+                type="text"
+                value={draft.label}
+                onChange={(e) =>
+                  setDraft((prev) => ({ ...prev, label: e.target.value }))
+                }
+                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                disabled={isDisabled}
+              />
+            </div>
 
-            <label className="text-sm text-white/70">Title</label>
-            <input
-              type="text"
-              value={draft.title}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, title: e.target.value }))
-              }
-              className="w-full rounded-md border border-white/10 bg-black/60 px-3 py-2 text-white"
-              disabled={isDisabled}
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Title</label>
+              <input
+                type="text"
+                value={draft.title}
+                onChange={(e) =>
+                  setDraft((prev) => ({ ...prev, title: e.target.value }))
+                }
+                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                disabled={isDisabled}
+              />
+            </div>
 
-            <label className="text-sm text-white/70">Image URL</label>
-            <input
-              type="text"
-              value={draft.imageUrl}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, imageUrl: e.target.value }))
-              }
-              className="w-full rounded-md border border-white/10 bg-black/60 px-3 py-2 text-white"
-              disabled={isDisabled}
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
+              <input
+                type="text"
+                value={draft.imageUrl}
+                onChange={(e) =>
+                  setDraft((prev) => ({ ...prev, imageUrl: e.target.value }))
+                }
+                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                disabled={isDisabled}
+              />
+            </div>
 
             <button
               onClick={handleSave}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white"
+              className="w-full rounded-md bg-white text-black px-4 py-2 text-sm font-bold hover:bg-white/90 disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]"
               disabled={isDisabled}
             >
-              Save changes
+              Apply to All Users
             </button>
           </div>
         )}
 
-        {status && <p className="text-xs text-white/60">{status}</p>}
+        {status && (
+          <p className={`text-center text-xs ${status === "Unauthorized" ? "text-red-400" : "text-white/40"}`}>
+            {status}
+          </p>
+        )}
       </div>
     </div>
   );
