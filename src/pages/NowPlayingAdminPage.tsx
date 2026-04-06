@@ -34,7 +34,8 @@ export const NowPlayingAdminPage: React.FC = () => {
       label: settings.label,
       title: settings.title,
       imageUrl: settings.imageUrl,
-      showEqualizer: settings.showEqualizer ?? true
+      showEqualizer: settings.showEqualizer ?? true,
+      showImage: settings.showImage ?? true
     }),
     [settings]
   );
@@ -93,7 +94,6 @@ export const NowPlayingAdminPage: React.FC = () => {
     if (unlocked) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Support full keyboard for passwords, not just digits
       if (e.key === "Backspace") {
         handleBackspace();
       } else if (e.key === "Enter") {
@@ -101,7 +101,6 @@ export const NowPlayingAdminPage: React.FC = () => {
       } else if (e.key === "Escape") {
         handleClear();
       } else if (e.key.length === 1) {
-        // Prevent shortcuts like Ctrl+C but allow all symbols/letters
         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
             handleDigit(e.key);
         }
@@ -263,6 +262,19 @@ export const NowPlayingAdminPage: React.FC = () => {
                 </label>
 
                 <label className="flex items-center justify-between text-sm text-white/70">
+                  Show image
+                  <input
+                    type="checkbox"
+                    checked={draft.showImage}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, showImage: e.target.checked }))
+                    }
+                    className="h-4 w-4 rounded border-white/20 bg-black"
+                    disabled={isDisabled}
+                  />
+                </label>
+
+                <label className="flex items-center justify-between text-sm text-white/70">
                   Show equalizer animation
                   <input
                     type="checkbox"
@@ -296,6 +308,19 @@ export const NowPlayingAdminPage: React.FC = () => {
                 value={draft.title}
                 onChange={(e) =>
                   setDraft((prev) => ({ ...prev, title: e.target.value }))
+                }
+                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                disabled={isDisabled}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
+              <input
+                type="text"
+                value={draft.imageUrl}
+                onChange={(e) =>
+                  setDraft((prev) => ({ ...prev, imageUrl: e.target.value }))
                 }
                 className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
                 disabled={isDisabled}

@@ -7,6 +7,7 @@ export type NowPlayingSettings = {
   imageUrl: string;
   expiresAt?: number | null;
   showEqualizer?: boolean;
+  showImage?: boolean;
 };
 
 const defaultSettings: NowPlayingSettings = {
@@ -15,7 +16,8 @@ const defaultSettings: NowPlayingSettings = {
   title: "Ambient focus mix",
   imageUrl: "/assets/img/logo-mini.png",
   expiresAt: null,
-  showEqualizer: true
+  showEqualizer: true,
+  showImage: true
 };
 
 export const useNowPlayingSettings = () => {
@@ -24,10 +26,13 @@ export const useNowPlayingSettings = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch("/api/now-playing");
+      const response = await fetch("/debug");
       if (response.ok) {
         const data = await response.json();
+        // Defaults for new fields
         if (data.showEqualizer === undefined) data.showEqualizer = true;
+        if (data.showImage === undefined) data.showImage = true;
+        
         if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
           setSettings({ ...data, enabled: false });
         } else {
@@ -46,7 +51,7 @@ export const useNowPlayingSettings = () => {
   }, []);
 
   const verifyPassword = async (password: string) => {
-    const response = await fetch("/api/now-playing", {
+    const response = await fetch("/debug", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,7 +63,7 @@ export const useNowPlayingSettings = () => {
   };
 
   const updateSettings = async (next: NowPlayingSettings, password: string, durationMinutes?: number) => {
-    const response = await fetch("/api/now-playing", {
+    const response = await fetch("/debug", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

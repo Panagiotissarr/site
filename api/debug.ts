@@ -9,7 +9,8 @@ const defaultSettings = {
   title: "Ambient focus mix",
   imageUrl: "/assets/img/logo-mini.png",
   expiresAt: null,
-  showEqualizer: true
+  showEqualizer: true,
+  showImage: true
 };
 
 const redis = new Redis({
@@ -29,7 +30,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const settings: any = (await redis.get(STORAGE_KEY)) || defaultSettings;
         let finalSettings = typeof settings === 'string' ? JSON.parse(settings) : settings;
+        
+        // Migration/Defaults for new fields
         if (finalSettings.showEqualizer === undefined) finalSettings.showEqualizer = true;
+        if (finalSettings.showImage === undefined) finalSettings.showImage = true;
         
         if (finalSettings.enabled && finalSettings.expiresAt && Date.now() > finalSettings.expiresAt) {
           finalSettings.enabled = false;
@@ -44,20 +48,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === "POST") {
-      // Logic for Unauthorized response with debug info
       if (!envPassword) {
         return res.status(500).json({ error: "ADMIN_PASSWORD not set in Vercel environment." });
       }
 
       if (!inputPassword || inputPassword !== envPassword) {
-        console.warn(`Auth mismatch: Input(${inputPassword.length}) vs Env(${envPassword.length})`);
         return res.status(401).json({ 
           error: "Unauthorized",
           debug: {
             receivedLength: inputPassword.length,
-            expectedLength: envPassword.length,
-            viaHeader: !!passwordHeader,
-            viaBody: !!bodyPassword
+            expectedLength: envPassword.length
           }
         });
       }
