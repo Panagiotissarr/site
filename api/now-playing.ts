@@ -15,23 +15,28 @@ const defaultSettings = {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const passwordHeader = req.headers['x-admin-password'];
   const bodyPassword = req.body?.password;
-  const password = String(passwordHeader || bodyPassword || "").trim();
+  
+  // Normalize both for comparison
+  const inputPassword = String(passwordHeader || bodyPassword || "").trim();
   const envPassword = String(process.env.ADMIN_PASSWORD || "").trim();
+
+  // Logging for Vercel Dashboard (Functions -> Logs)
+  // This helps identify if it's a length mismatch or missing env var
+  console.log("Auth Attempt Details:");
+  console.log("- Input length:", inputPassword.length);
+  console.log("- Env Var configured:", !!envPassword);
+  console.log("- Env Var length:", envPassword.length);
+  console.log("- Method:", req.method);
 
   if (req.method === "GET") {
     try {
       const settings: any = (await kv.get(STORAGE_KEY)) || defaultSettings;
-      
-      // Ensure showEqualizer exists for older records
       if (settings.showEqualizer === undefined) settings.showEqualizer = true;
-
-      // Auto-disable if expired
       if (settings.enabled && settings.expiresAt && Date.now() > settings.expiresAt) {
         settings.enabled = false;
         settings.expiresAt = null;
         await kv.set(STORAGE_KEY, settings);
       }
-      
       return res.status(200).json(settings);
     } catch (error) {
       console.error("KV fetch error:", error);
@@ -42,22 +47,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     const { action, settings, durationMinutes } = req.body;
 
-    // Security check
     if (!envPassword) {
-      console.error("CRITICAL: ADMIN_PASSWORD environment variable is not set in Vercel.");
-      return res.status(500).json({ error: "Server configuration error (Missing Env Var)" });
+      return res.status(500).json({ error: "ADMIN_PASSWORD not set in Vercel" });
     }
 
-    if (!password || password !== envPassword) {
+    if (!inputPassword || inputPassword !== envPassword) {
+      console.warn(`Unauthorized attempt: Received length ${inputPassword.length}, Expected ${envPassword.length}`);
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     if (action === "verify") {
       return res.status(200).json({ success: true });
-    }
-
-    if (!settings || typeof settings !== "object") {
-      return res.status(400).json({ error: "Invalid settings" });
     }
 
     try {

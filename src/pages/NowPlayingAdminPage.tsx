@@ -27,7 +27,6 @@ export const NowPlayingAdminPage: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [duration, setDuration] = useState(-2);
   const [customDuration, setCustomDuration] = useState(120);
-  const pinLength = 6;
 
   const formState = useMemo(
     () => ({
@@ -46,7 +45,6 @@ export const NowPlayingAdminPage: React.FC = () => {
     setDraft(formState);
   }, [formState]);
 
-  // Auto-lock every 5 minutes (300,000 ms)
   useEffect(() => {
     if (unlocked) {
       const timer = setTimeout(() => {
@@ -62,20 +60,24 @@ export const NowPlayingAdminPage: React.FC = () => {
     if (pin.length === 0) return;
     setIsVerifying(true);
     setStatus("Verifying...");
-    const success = await verifyPassword(pin);
-    setIsVerifying(false);
-    
-    if (success) {
-      setUnlocked(true);
-      setStatus("Unlocked");
-      setSafetyLock(false);
-    } else {
-      setStatus("Unauthorized");
+    try {
+      const success = await verifyPassword(pin);
+      setIsVerifying(false);
+      
+      if (success) {
+        setUnlocked(true);
+        setStatus("Unlocked");
+        setSafetyLock(false);
+      } else {
+        setStatus("Unauthorized (Check your password/env var)");
+      }
+    } catch (err) {
+      setIsVerifying(false);
+      setStatus("Server error. Check Vercel logs.");
     }
   };
 
   const handleDigit = (digit: string) => {
-    if (pin.length >= pinLength && pinLength > 0) return;
     setPin((prev) => prev + digit);
   };
 
@@ -87,25 +89,28 @@ export const NowPlayingAdminPage: React.FC = () => {
     setPin("");
   };
 
-  // Keyboard support for PIN entry
   useEffect(() => {
     if (unlocked) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key >= "0" && e.key <= "9") {
-        handleDigit(e.key);
-      } else if (e.key === "Backspace") {
+      // Support full keyboard for passwords, not just digits
+      if (e.key === "Backspace") {
         handleBackspace();
       } else if (e.key === "Enter") {
         handleUnlock();
       } else if (e.key === "Escape") {
         handleClear();
+      } else if (e.key.length === 1) {
+        // Prevent shortcuts like Ctrl+C but allow all symbols/letters
+        if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            handleDigit(e.key);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [unlocked, pin]); // Dependencies ensure current pin is available to handleUnlock
+  }, [unlocked, pin]);
 
   const applyPreset = (preset: typeof PRESETS[0]) => {
     setDraft((prev) => ({
@@ -161,8 +166,8 @@ export const NowPlayingAdminPage: React.FC = () => {
         {!unlocked && (
           <div className="space-y-3">
             <label className="text-sm text-white/70">Master Password</label>
-            <div className="flex items-center justify-center gap-3 py-2">
-              {Array.from({ length: Math.max(pin.length, pinLength) }).map((_, index) => (
+            <div className="flex flex-wrap items-center justify-center gap-2 py-2">
+              {Array.from({ length: Math.max(pin.length, 6) }).map((_, index) => (
                 <span
                   key={`dot-${index}`}
                   className={`h-3 w-3 rounded-full border transition-all duration-200 ${
@@ -340,7 +345,7 @@ export const NowPlayingAdminPage: React.FC = () => {
         )}
 
         {status && (
-          <p className={`text-center text-xs ${status === "Unauthorized" || status.includes("Locked") ? "text-red-400" : "text-white/40"}`}>
+          <p className={`text-center text-xs ${status.includes("Unauthorized") || status.includes("Locked") || status.includes("error") ? "text-red-400" : "text-white/40"}`}>
             {status}
           </p>
         )}
