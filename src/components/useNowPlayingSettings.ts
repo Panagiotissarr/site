@@ -27,11 +27,7 @@ export const useNowPlayingSettings = () => {
       const response = await fetch("/api/now-playing");
       if (response.ok) {
         const data = await response.json();
-        
-        // Ensure showEqualizer exists
         if (data.showEqualizer === undefined) data.showEqualizer = true;
-
-        // Frontend check for expiry
         if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
           setSettings({ ...data, enabled: false });
         } else {
@@ -53,7 +49,8 @@ export const useNowPlayingSettings = () => {
     const response = await fetch("/api/now-playing", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "x-admin-password": password
       },
       body: JSON.stringify({ password, action: "verify" })
     });
@@ -64,14 +61,16 @@ export const useNowPlayingSettings = () => {
     const response = await fetch("/api/now-playing", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "x-admin-password": password
       },
       body: JSON.stringify({ password, settings: next, durationMinutes })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Update failed");
+      const debugInfo = errorData.debug ? ` (Received: ${errorData.debug.receivedLength}, Expected: ${errorData.debug.expectedLength})` : "";
+      throw new Error((errorData.error || "Update failed") + debugInfo);
     }
 
     const data = await response.json();
