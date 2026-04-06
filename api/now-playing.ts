@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const STORAGE_KEY = "nowPlaying.settings.v2";
@@ -12,6 +12,12 @@ const defaultSettings = {
   showEqualizer: true
 };
 
+// Initialize Redis directly using environment variables
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL || "",
+  token: process.env.KV_REST_API_TOKEN || "",
+});
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const passwordHeader = req.headers['x-admin-password'];
@@ -23,29 +29,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // GET request (publicly accessible)
     if (req.method === "GET") {
       try {
-        const settings: any = (await kv.get(STORAGE_KEY)) || defaultSettings;
-        if (settings.showEqualizer === undefined) settings.showEqualizer = true;
-        if (settings.enabled && settings.expiresAt && Date.now() > settings.expiresAt) {
-          settings.enabled = false;
-          settings.expiresAt = null;
-          await kv.set(STORAGE_KEY, settings);
+        const settings: any = (await redis.get(STORAGE_KEY)) || defaultSettings;
+        
+        // Handle potential parsing if it comes back as a string
+        let finalSettings = typeof settings === 'string' ? JSON.parse(settings) : settings;
+        
+        if (finalSettings.showEqualizer === undefined) finalSettings.showEqualizer = true;
+        
+        // Auto-disable if expired
+        if (finalSettings.enabled && finalSettings.expiresAt && Date.now() > finalSettings.expiresAt) {
+          finalSettings.enabled = false;
+          finalSettings.expiresAt = null;
+          await redis.set(STORAGE_KEY, finalSettings);
         }
-        return res.status(200).json(settings);
+        return res.status(200).json(finalSettings);
       } catch (kvError) {
-        console.error("KV fetch error:", kvError);
+        console.error("Redis fetch error:", kvError);
         return res.status(200).json(defaultSettings);
       }
     }
 
     // POST request (admin only)
     if (req.method === "POST") {
-      // DEBUG LOGS - View these in Vercel Dashboard -> Logs
-      console.log("--- AUTH DEBUG START ---");
-      console.log("Env Var configured:", !!process.env.ADMIN_PASSWORD);
-      console.log("Env Var length:", envPassword.length);
-      console.log("Input Password length:", inputPassword.length);
-      console.log("--- AUTH DEBUG END ---");
-
       if (!envPassword) {
         return res.status(500).json({ error: "ADMIN_PASSWORD not set in Vercel" });
       }
@@ -68,10 +73,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           newSettings.expiresAt = null;
         }
 
-        await kv.set(STORAGE_KEY, newSettings);
+        await redis.set(STORAGE_KEY, newSettings);
         return res.status(200).json({ success: true, settings: newSettings });
       } catch (kvError) {
-        console.error("KV update error:", kvError);
+        console.error("Redis update error:", kvError);
         return res.status(500).json({ error: "Database error" });
       }
     }
@@ -79,6 +84,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   } catch (globalError) {
     console.error("Global API Error:", globalError);
-    return res.status(500).json({ error: "Internal Server Error", details: String(globalError) });
+    return res.status(500).json({ 
+      error: "Internal Server Error", 
+      details: String(globalError),
+      env: {
+        hasUrl: !!process.env.KV_REST_API_URL,
+        hasToken: !!process.env.KV_REST_API_TOKEN,
+        hasPass: !!process.env.ADMIN_PASSWORD
+      }
+    });
   }
 }
