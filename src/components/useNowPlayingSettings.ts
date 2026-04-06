@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 export type NowPlayingSettings = {
   enabled: boolean;
@@ -8,6 +8,7 @@ export type NowPlayingSettings = {
   expiresAt?: number | null;
   showEqualizer?: boolean;
   showImage?: boolean;
+  lastUpdated?: number;
 };
 
 const defaultSettings: NowPlayingSettings = {
@@ -17,37 +18,54 @@ const defaultSettings: NowPlayingSettings = {
   imageUrl: "/assets/img/logo-mini.png",
   expiresAt: null,
   showEqualizer: true,
-  showImage: true
+  showImage: true,
+  lastUpdated: 0
 };
 
 export const useNowPlayingSettings = () => {
   const [settings, setSettings] = useState<NowPlayingSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
+  const lastUpdatedRef = useRef<number>(0);
 
-  const fetchSettings = async () => {
+  const fetchSettings = async (isPoll: boolean = false) => {
     try {
       const response = await fetch("/debug");
       if (response.ok) {
         const data = await response.json();
-        // Defaults for new fields
+        
+        // Ensure defaults
         if (data.showEqualizer === undefined) data.showEqualizer = true;
         if (data.showImage === undefined) data.showImage = true;
         
-        if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
-          setSettings({ ...data, enabled: false });
-        } else {
-          setSettings(data);
+        const serverLastUpdated = data.lastUpdated || 0;
+
+        // Only update state if data has changed
+        if (serverLastUpdated > lastUpdatedRef.current || !isPoll) {
+          lastUpdatedRef.current = serverLastUpdated;
+          
+          if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
+            setSettings({ ...data, enabled: false });
+          } else {
+            setSettings(data);
+          }
         }
       }
     } catch (error) {
-      console.error("Failed to fetch settings:", error);
+      if (!isPoll) console.error("Failed to fetch settings:", error);
     } finally {
-      setIsLoading(false);
+      if (!isPoll) setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchSettings();
+
+    // Live updates: poll every 7 seconds
+    const interval = setInterval(() => {
+      fetchSettings(true);
+    }, 7000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const verifyPassword = async (password: string) => {
@@ -79,6 +97,7 @@ export const useNowPlayingSettings = () => {
     }
 
     const data = await response.json();
+    lastUpdatedRef.current = data.settings.lastUpdated || Date.now();
     setSettings(data.settings);
   };
 

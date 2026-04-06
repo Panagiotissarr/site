@@ -10,7 +10,8 @@ const defaultSettings = {
   imageUrl: "/assets/img/logo-mini.png",
   expiresAt: null,
   showEqualizer: true,
-  showImage: true
+  showImage: true,
+  lastUpdated: Date.now()
 };
 
 const redis = new Redis({
@@ -31,13 +32,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const settings: any = (await redis.get(STORAGE_KEY)) || defaultSettings;
         let finalSettings = typeof settings === 'string' ? JSON.parse(settings) : settings;
         
-        // Migration/Defaults for new fields
         if (finalSettings.showEqualizer === undefined) finalSettings.showEqualizer = true;
         if (finalSettings.showImage === undefined) finalSettings.showImage = true;
+        if (finalSettings.lastUpdated === undefined) finalSettings.lastUpdated = Date.now();
         
         if (finalSettings.enabled && finalSettings.expiresAt && Date.now() > finalSettings.expiresAt) {
           finalSettings.enabled = false;
           finalSettings.expiresAt = null;
+          finalSettings.lastUpdated = Date.now();
           await redis.set(STORAGE_KEY, finalSettings);
         }
         return res.status(200).json(finalSettings);
@@ -69,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       try {
-        const newSettings = { ...settings };
+        const newSettings = { ...settings, lastUpdated: Date.now() };
         if (durationMinutes && durationMinutes > 0) {
           newSettings.expiresAt = Date.now() + durationMinutes * 60 * 1000;
         } else if (durationMinutes === 0 || durationMinutes === -2) {
