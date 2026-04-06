@@ -59,6 +59,7 @@ export const NowPlayingAdminPage: React.FC = () => {
   }, [unlocked]);
 
   const handleUnlock = async () => {
+    if (pin.length === 0) return;
     setIsVerifying(true);
     setStatus("Verifying...");
     const success = await verifyPassword(pin);
@@ -85,6 +86,26 @@ export const NowPlayingAdminPage: React.FC = () => {
   const handleClear = () => {
     setPin("");
   };
+
+  // Keyboard support for PIN entry
+  useEffect(() => {
+    if (unlocked) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key >= "0" && e.key <= "9") {
+        handleDigit(e.key);
+      } else if (e.key === "Backspace") {
+        handleBackspace();
+      } else if (e.key === "Enter") {
+        handleUnlock();
+      } else if (e.key === "Escape") {
+        handleClear();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [unlocked, pin]); // Dependencies ensure current pin is available to handleUnlock
 
   const applyPreset = (preset: typeof PRESETS[0]) => {
     setDraft((prev) => ({
@@ -185,11 +206,12 @@ export const NowPlayingAdminPage: React.FC = () => {
 
             <button
               onClick={handleUnlock}
-              disabled={isVerifying}
+              disabled={isVerifying || pin.length === 0}
               className="w-full rounded-md bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 disabled:opacity-50"
             >
               {isVerifying ? "Verifying..." : "Unlock"}
             </button>
+            <p className="text-[10px] text-center text-white/20">Use keyboard digits or click. Enter to unlock.</p>
           </div>
         )}
 

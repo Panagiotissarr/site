@@ -15,7 +15,8 @@ const defaultSettings = {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const passwordHeader = req.headers['x-admin-password'];
   const bodyPassword = req.body?.password;
-  const password = passwordHeader || bodyPassword;
+  const password = String(passwordHeader || bodyPassword || "").trim();
+  const envPassword = String(process.env.ADMIN_PASSWORD || "").trim();
 
   if (req.method === "GET") {
     try {
@@ -41,7 +42,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     const { action, settings, durationMinutes } = req.body;
 
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
+    // Security check
+    if (!envPassword) {
+      console.error("CRITICAL: ADMIN_PASSWORD environment variable is not set in Vercel.");
+      return res.status(500).json({ error: "Server configuration error (Missing Env Var)" });
+    }
+
+    if (!password || password !== envPassword) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
@@ -58,7 +65,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (durationMinutes && durationMinutes > 0) {
         newSettings.expiresAt = Date.now() + durationMinutes * 60 * 1000;
       } else if (durationMinutes === 0 || durationMinutes === -2) {
-        // 0 is "Permanent" in old logic, -2 is explicit "Never Expires"
         newSettings.expiresAt = null;
       }
 
