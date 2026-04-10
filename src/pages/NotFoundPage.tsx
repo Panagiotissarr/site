@@ -53,7 +53,7 @@ export const NotFoundPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(800px_400px_at_10%_10%,rgba(56,189,248,0.18),transparent),radial-gradient(800px_400px_at_90%_90%,rgba(167,139,250,0.18),transparent)]">
-      <div className="flex min-h-screen items-center justify-center bg-[url('/assets/img/web-preview.png')] bg-cover bg-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[url('https://2.gravatar.com/bg/248931595/156d264684691a181023e71ae7b6240a')] bg-cover bg-center px-4">
         <div
           ref={cardRef}
           className="group"
@@ -71,7 +71,7 @@ export const NotFoundPage: React.FC = () => {
               <div
                 className="text-[96px] font-extrabold leading-none"
                 style={{
-                  backgroundImage: "url('/assets/img/seal.png')",
+                  backgroundImage: "url('https://panagiotis2211.wordpress.com/wp-content/uploads/2026/01/lock-screen.jpg')",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   WebkitBackgroundClip: "text",
