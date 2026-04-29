@@ -26,11 +26,46 @@ const defaultSettings: NowPlayingSettings = {
   lastfmEnabled: true
 };
 
+const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("nowplaying-lastfm") : null;
+const LEADER_KEY = "nowplaying-leader";
+const LEADER_TIMEOUT = 30000;
+
+function tryClaimLeader(): boolean {
+  if (typeof sessionStorage === "undefined") return true;
+  const currentLeader = sessionStorage.getItem(LEADER_KEY);
+  if (!currentLeader) {
+    const id = Math.random().toString(36).slice(2);
+    sessionStorage.setItem(LEADER_KEY, id);
+    return true;
+  }
+  return false;
+}
+
 export const useNowPlayingSettings = () => {
   const [settings, setSettings] = useState<NowPlayingSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const lastUpdatedRef = useRef<number>(0);
   const manualSettingsRef = useRef<NowPlayingSettings>(defaultSettings);
+  const currentTrackRef = useRef<string>("");
+  const isLeaderRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!channel) return;
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (data.type === "nowplaying") {
+        currentTrackRef.current = data.trackKey;
+        setSettings({
+          ...data.settings,
+          isScrobbling: true
+        });
+      } else if (data.type === "lastfm-ended") {
+        currentTrackRef.current = "";
+        setSettings({ ...manualSettingsRef.current, isScrobbling: false });
+      }
+    };
+    return () => { channel.onmessage = null; };
+  }, []);
 
   const fetchLastfm = async () => {
     try {
@@ -39,25 +74,33 @@ export const useNowPlayingSettings = () => {
         const data = await response.json();
 
         if (data.nowPlaying) {
-          setSettings({
-            enabled: true,
-            label: "Scrobbling",
-            title: `${data.artist} — ${data.title}`,
-            imageUrl: data.image || "/assets/img/logo-mini.png",
-            expiresAt: null,
-            showEqualizer: true,
-            showImage: true,
-            lastUpdated: Date.now(),
-            isScrobbling: true
-          });
-        } else {
+          const trackKey = `${data.artist} - ${data.title}`;
+          const displayTitle = `${data.artist} — ${data.title}`;
+
+          if (currentTrackRef.current !== trackKey) {
+            currentTrackRef.current = trackKey;
+            const newSettings: NowPlayingSettings = {
+              enabled: true,
+              label: "Scrobbling",
+              title: displayTitle,
+              imageUrl: data.image || "/assets/img/logo-mini.png",
+              expiresAt: null,
+              showEqualizer: true,
+              showImage: true,
+              lastUpdated: Date.now(),
+              isScrobbling: true
+            };
+            setSettings(newSettings);
+            channel?.postMessage({ type: "nowplaying", trackKey, settings: newSettings });
+          }
+        } else if (currentTrackRef.current !== "") {
+          currentTrackRef.current = "";
           setSettings({ ...manualSettingsRef.current, isScrobbling: false });
+          channel?.postMessage({ type: "lastfm-ended" });
         }
       }
     } catch (error) {
       console.error("Failed to fetch Last.fm data:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -80,7 +123,9 @@ export const useNowPlayingSettings = () => {
           if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
             setSettings({ ...data, enabled: false });
           } else {
-            setSettings(data);
+            if (currentTrackRef.current === "") {
+              setSettings(data);
+            }
           }
         }
       }
@@ -95,11 +140,31 @@ export const useNowPlayingSettings = () => {
     fetchSettings();
     fetchLastfm();
 
-    const interval = setInterval(() => {
+    isLeaderRef.current = tryClaimLeader();
+
+    const lastfmInterval = setInterval(() => {
+      if (isLeaderRef.current) {
+        fetchLastfm();
+      }
+    }, 10000);
+
+    const leaderCheckInterval = setInterval(() => {
+      if (isLeaderRef.current) {
+        tryClaimLeader();
+      } else {
+        isLeaderRef.current = tryClaimLeader();
+      }
+    }, LEADER_TIMEOUT);
+
+    const settingsInterval = setInterval(() => {
       fetchSettings();
     }, 7000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(lastfmInterval);
+      clearInterval(leaderCheckInterval);
+      clearInterval(settingsInterval);
+    };
   }, []);
 
   const verifyPassword = async (password: string) => {
@@ -133,7 +198,9 @@ export const useNowPlayingSettings = () => {
     const data = await response.json();
     lastUpdatedRef.current = data.settings.lastUpdated || Date.now();
     manualSettingsRef.current = data.settings;
-    setSettings(data.settings);
+    if (currentTrackRef.current === "") {
+      setSettings(data.settings);
+    }
   };
 
   return useMemo(
