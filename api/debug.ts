@@ -11,7 +11,8 @@ const defaultSettings = {
   expiresAt: null,
   showEqualizer: true,
   showImage: true,
-  lastUpdated: Date.now()
+  lastUpdated: Date.now(),
+  lastfmEnabled: true
 };
 
 const redis = new Redis({

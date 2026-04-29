@@ -10,6 +10,7 @@ export type NowPlayingSettings = {
   showImage?: boolean;
   lastUpdated?: number;
   isScrobbling?: boolean;
+  lastfmEnabled?: boolean;
 };
 
 const defaultSettings: NowPlayingSettings = {
@@ -21,7 +22,8 @@ const defaultSettings: NowPlayingSettings = {
   showEqualizer: true,
   showImage: true,
   lastUpdated: 0,
-  isScrobbling: false
+  isScrobbling: false,
+  lastfmEnabled: true
 };
 
 const MAX_LASTFM_REFRESHES = 3;
@@ -41,6 +43,8 @@ export const useNowPlayingSettings = () => {
       }
       return;
     }
+
+    if (!settings.lastfmEnabled) return;
 
     lastfmRefreshCountRef.current += 1;
 
@@ -113,17 +117,19 @@ export const useNowPlayingSettings = () => {
       fetchSettings(true);
     }, 7000);
 
-    const lastfmInterval = setInterval(() => {
-      fetchLastfm(true);
-    }, 10000);
-    
-    lastfmPollIntervalRef.current = lastfmInterval;
+    let lastfmInterval: ReturnType<typeof setInterval>;
+    if (settings.lastfmEnabled !== false) {
+      lastfmInterval = setInterval(() => {
+        fetchLastfm(true);
+      }, 10000);
+      lastfmPollIntervalRef.current = lastfmInterval;
+    }
 
     return () => {
       clearInterval(interval);
-      clearInterval(lastfmInterval);
+      if (lastfmInterval) clearInterval(lastfmInterval);
     };
-  }, []);
+  }, [settings.lastfmEnabled]);
 
   const verifyPassword = async (password: string) => {
     const response = await fetch("/debug", {

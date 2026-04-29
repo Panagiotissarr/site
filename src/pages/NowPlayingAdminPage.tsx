@@ -37,7 +37,8 @@ export const NowPlayingAdminPage: React.FC = () => {
       title: settings.title,
       imageUrl: settings.imageUrl,
       showEqualizer: settings.showEqualizer ?? true,
-      showImage: settings.showImage ?? true
+      showImage: settings.showImage ?? true,
+      lastfmEnabled: settings.lastfmEnabled ?? true
     }),
     [settings]
   );
@@ -251,6 +252,19 @@ export const NowPlayingAdminPage: React.FC = () => {
 
             <div className="flex flex-col gap-3 pt-2 border-t border-white/5">
                 <label className="flex items-center justify-between text-sm text-white/70">
+                  Check for Last.fm
+                  <input
+                    type="checkbox"
+                    checked={draft.lastfmEnabled}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, lastfmEnabled: e.target.checked }))
+                    }
+                    className="h-4 w-4 rounded border-white/20 bg-black"
+                    disabled={isDisabled}
+                  />
+                </label>
+
+                <label className="flex items-center justify-between text-sm text-white/70">
                   Enable widget
                   <input
                     type="checkbox"
@@ -263,6 +277,8 @@ export const NowPlayingAdminPage: React.FC = () => {
                   />
                 </label>
 
+                {!draft.lastfmEnabled && (
+                  <>
                 <label className="flex items-center justify-between text-sm text-white/70">
                   Show image
                   <input
@@ -288,58 +304,60 @@ export const NowPlayingAdminPage: React.FC = () => {
                     disabled={isDisabled}
                   />
                 </label>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Label</label>
-              <input
-                type="text"
-                value={draft.label}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, label: e.target.value }))
-                }
-                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
-                disabled={isDisabled}
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-white/40">Label</label>
+                  <input
+                    type="text"
+                    value={draft.label}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, label: e.target.value }))
+                    }
+                    className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                    disabled={isDisabled}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-white/40">Title</label>
-              <input
-                type="text"
-                value={draft.title}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, title: e.target.value }))
-                }
-                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
-                disabled={isDisabled}
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-white/40">Title</label>
+                  <input
+                    type="text"
+                    value={draft.title}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, title: e.target.value }))
+                    }
+                    className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                    disabled={isDisabled}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
-                <button
-                  onClick={() => setShowImagePicker(true)}
-                  disabled={isDisabled}
-                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white hover:bg-white/10"
-                >
-                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                  Search & Crop
-                </button>
-              </div>
-              <input
-                type="text"
-                value={draft.imageUrl}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, imageUrl: e.target.value }))
-                }
-                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
-                disabled={isDisabled}
-              />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium uppercase tracking-wider text-white/40">Image URL</label>
+                    <button
+                      onClick={() => setShowImagePicker(true)}
+                      disabled={isDisabled}
+                      className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white hover:bg-white/10"
+                    >
+                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                      Search & Crop
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={draft.imageUrl}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, imageUrl: e.target.value }))
+                    }
+                    className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-white focus:outline-none focus:border-white/30"
+                    disabled={isDisabled}
+                  />
+                </div>
+                  </>
+                )}
             </div>
 
             <div className="space-y-2">
