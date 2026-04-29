@@ -30,13 +30,34 @@ const FAST_REFRESH_COUNT = 3;
 const FAST_REFRESH_INTERVAL = 10000;
 const SLOW_REFRESH_INTERVAL = 30000;
 
+const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("nowplaying-lastfm") : null;
+
 export const useNowPlayingSettings = () => {
   const [settings, setSettings] = useState<NowPlayingSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const lastUpdatedRef = useRef<number>(0);
-  const lastfmRefreshCountRef = useRef<number>(0);
   const lastfmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentTrackRef = useRef<string>("");
+  const manualSettingsRef = useRef<NowPlayingSettings>(defaultSettings);
+  const isLeaderRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!channel) return;
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (data.type === "nowplaying") {
+        currentTrackRef.current = data.trackKey;
+        setSettings({
+          ...data.settings,
+          isScrobbling: true
+        });
+      } else if (data.type === "lastfm-ended") {
+        currentTrackRef.current = "";
+        setSettings({ ...manualSettingsRef.current, isScrobbling: false });
+      }
+    };
+    return () => { channel.onmessage = null; };
+  }, []);
 
   const startLastfmPolling = (interval: number) => {
     if (lastfmIntervalRef.current) {
@@ -55,33 +76,28 @@ export const useNowPlayingSettings = () => {
 
         if (data.nowPlaying) {
           const trackKey = `${data.artist} - ${data.title}`;
-          
+          const displayTitle = `${data.artist} — ${data.title}`;
+          const newSettings: NowPlayingSettings = {
+            enabled: true,
+            label: "Scrobbling",
+            title: displayTitle,
+            imageUrl: data.image || "/assets/img/logo-mini.png",
+            expiresAt: null,
+            showEqualizer: true,
+            showImage: true,
+            lastUpdated: Date.now(),
+            isScrobbling: true
+          };
+
           if (currentTrackRef.current !== trackKey || !isPoll) {
             currentTrackRef.current = trackKey;
-            const displayTitle = `${data.artist} — ${data.title}`;
-            setSettings({
-              enabled: true,
-              label: "Scrobbling",
-              title: displayTitle,
-              imageUrl: data.image || "/assets/img/logo-mini.png",
-              expiresAt: null,
-              showEqualizer: true,
-              showImage: true,
-              lastUpdated: Date.now(),
-              isScrobbling: true
-            });
+            setSettings(newSettings);
+            channel?.postMessage({ type: "nowplaying", trackKey, settings: newSettings });
           }
-        } else {
-          if (currentTrackRef.current !== "") {
-            currentTrackRef.current = "";
-            if (!isPoll) {
-              setSettings({
-                ...defaultSettings,
-                lastUpdated: Date.now(),
-                isScrobbling: false
-              });
-            }
-          }
+        } else if (currentTrackRef.current !== "") {
+          currentTrackRef.current = "";
+          setSettings({ ...manualSettingsRef.current, isScrobbling: false });
+          channel?.postMessage({ type: "lastfm-ended" });
         }
       }
     } catch (error) {
@@ -96,20 +112,23 @@ export const useNowPlayingSettings = () => {
       const response = await fetch("/debug");
       if (response.ok) {
         const data = await response.json();
-        
+
         if (data.showEqualizer === undefined) data.showEqualizer = true;
         if (data.showImage === undefined) data.showImage = true;
         if (data.lastfmEnabled === undefined) data.lastfmEnabled = true;
-        
+
         const serverLastUpdated = data.lastUpdated || 0;
 
         if (serverLastUpdated > lastUpdatedRef.current || !isPoll) {
           lastUpdatedRef.current = serverLastUpdated;
-          
+          manualSettingsRef.current = data;
+
           if (data.enabled && data.expiresAt && Date.now() > data.expiresAt) {
             setSettings({ ...data, enabled: false });
           } else {
-            setSettings(data);
+            if (currentTrackRef.current === "") {
+              setSettings(data);
+            }
           }
         }
       }
@@ -122,6 +141,9 @@ export const useNowPlayingSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+
+    const id = Math.random().toString(36).slice(2);
+    isLeaderRef.current = true;
     fetchLastfm();
 
     const interval = setInterval(() => {
@@ -175,7 +197,10 @@ export const useNowPlayingSettings = () => {
 
     const data = await response.json();
     lastUpdatedRef.current = data.settings.lastUpdated || Date.now();
-    setSettings(data.settings);
+    manualSettingsRef.current = data.settings;
+    if (currentTrackRef.current === "") {
+      setSettings(data.settings);
+    }
   };
 
   return useMemo(

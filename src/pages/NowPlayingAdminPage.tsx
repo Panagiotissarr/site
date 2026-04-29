@@ -277,8 +277,6 @@ export const NowPlayingAdminPage: React.FC = () => {
                   />
                 </label>
 
-                {!draft.lastfmEnabled && (
-                  <>
                 <label className="flex items-center justify-between text-sm text-white/70">
                   Show image
                   <input
@@ -356,8 +354,6 @@ export const NowPlayingAdminPage: React.FC = () => {
                     disabled={isDisabled}
                   />
                 </div>
-                  </>
-                )}
             </div>
 
             <div className="space-y-2">
