@@ -9,6 +9,7 @@ export type NowPlayingSettings = {
   showEqualizer?: boolean;
   showImage?: boolean;
   lastUpdated?: number;
+  isScrobbling?: boolean;
 };
 
 const defaultSettings: NowPlayingSettings = {
@@ -19,13 +20,62 @@ const defaultSettings: NowPlayingSettings = {
   expiresAt: null,
   showEqualizer: true,
   showImage: true,
-  lastUpdated: 0
+  lastUpdated: 0,
+  isScrobbling: false
 };
+
+const MAX_LASTFM_REFRESHES = 3;
 
 export const useNowPlayingSettings = () => {
   const [settings, setSettings] = useState<NowPlayingSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const lastUpdatedRef = useRef<number>(0);
+  const lastfmRefreshCountRef = useRef<number>(0);
+  const lastfmPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchLastfm = async (isPoll: boolean = false) => {
+    if (lastfmRefreshCountRef.current >= MAX_LASTFM_REFRESHES) {
+      if (lastfmPollIntervalRef.current) {
+        clearInterval(lastfmPollIntervalRef.current);
+        lastfmPollIntervalRef.current = null;
+      }
+      return;
+    }
+
+    lastfmRefreshCountRef.current += 1;
+
+    try {
+      const response = await fetch("/api/lastfm-now-playing");
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.nowPlaying) {
+          const displayTitle = `${data.artist} — ${data.title}`;
+          setSettings({
+            enabled: true,
+            label: "Scrobbling",
+            title: displayTitle,
+            imageUrl: data.image || "/assets/img/logo-mini.png",
+            expiresAt: null,
+            showEqualizer: true,
+            showImage: true,
+            lastUpdated: Date.now(),
+            isScrobbling: true
+          });
+        } else if (!isPoll) {
+          setSettings({
+            ...defaultSettings,
+            lastUpdated: Date.now(),
+            isScrobbling: false
+          });
+        }
+      }
+    } catch (error) {
+      if (!isPoll) console.error("Failed to fetch Last.fm data:", error);
+    } finally {
+      if (!isPoll) setIsLoading(false);
+    }
+  };
 
   const fetchSettings = async (isPoll: boolean = false) => {
     try {
@@ -33,13 +83,11 @@ export const useNowPlayingSettings = () => {
       if (response.ok) {
         const data = await response.json();
         
-        // Ensure defaults
         if (data.showEqualizer === undefined) data.showEqualizer = true;
         if (data.showImage === undefined) data.showImage = true;
         
         const serverLastUpdated = data.lastUpdated || 0;
 
-        // Only update state if data has changed
         if (serverLastUpdated > lastUpdatedRef.current || !isPoll) {
           lastUpdatedRef.current = serverLastUpdated;
           
@@ -59,13 +107,22 @@ export const useNowPlayingSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+    fetchLastfm();
 
-    // Live updates: poll every 7 seconds
     const interval = setInterval(() => {
       fetchSettings(true);
     }, 7000);
 
-    return () => clearInterval(interval);
+    const lastfmInterval = setInterval(() => {
+      fetchLastfm(true);
+    }, 10000);
+    
+    lastfmPollIntervalRef.current = lastfmInterval;
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(lastfmInterval);
+    };
   }, []);
 
   const verifyPassword = async (password: string) => {
