@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const LASTFM_API_KEY = process.env["last-fm-api"];
+const LASTFM_API_KEY = process.env.last_fm_api;
 const LASTFM_USERNAME = process.env.LASTFM_USERNAME;
 const LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/";
 
