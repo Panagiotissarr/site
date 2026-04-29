@@ -26,52 +26,62 @@ const defaultSettings: NowPlayingSettings = {
   lastfmEnabled: true
 };
 
-const MAX_LASTFM_REFRESHES = 3;
+const FAST_REFRESH_COUNT = 3;
+const FAST_REFRESH_INTERVAL = 10000;
+const SLOW_REFRESH_INTERVAL = 30000;
 
 export const useNowPlayingSettings = () => {
   const [settings, setSettings] = useState<NowPlayingSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const lastUpdatedRef = useRef<number>(0);
   const lastfmRefreshCountRef = useRef<number>(0);
-  const lastfmPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastfmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentTrackRef = useRef<string>("");
+
+  const startLastfmPolling = (interval: number) => {
+    if (lastfmIntervalRef.current) {
+      clearInterval(lastfmIntervalRef.current);
+    }
+    lastfmIntervalRef.current = setInterval(() => {
+      fetchLastfm(true);
+    }, interval);
+  };
 
   const fetchLastfm = async (isPoll: boolean = false) => {
-    if (lastfmRefreshCountRef.current >= MAX_LASTFM_REFRESHES) {
-      if (lastfmPollIntervalRef.current) {
-        clearInterval(lastfmPollIntervalRef.current);
-        lastfmPollIntervalRef.current = null;
-      }
-      return;
-    }
-
-    if (!settings.lastfmEnabled) return;
-
-    lastfmRefreshCountRef.current += 1;
-
     try {
       const response = await fetch("/api/lastfm-now-playing");
       if (response.ok) {
         const data = await response.json();
 
         if (data.nowPlaying) {
-          const displayTitle = `${data.artist} — ${data.title}`;
-          setSettings({
-            enabled: true,
-            label: "Scrobbling",
-            title: displayTitle,
-            imageUrl: data.image || "/assets/img/logo-mini.png",
-            expiresAt: null,
-            showEqualizer: true,
-            showImage: true,
-            lastUpdated: Date.now(),
-            isScrobbling: true
-          });
-        } else if (!isPoll) {
-          setSettings({
-            ...defaultSettings,
-            lastUpdated: Date.now(),
-            isScrobbling: false
-          });
+          const trackKey = `${data.artist} - ${data.title}`;
+          
+          if (currentTrackRef.current !== trackKey || !isPoll) {
+            currentTrackRef.current = trackKey;
+            const displayTitle = `${data.artist} — ${data.title}`;
+            setSettings({
+              enabled: true,
+              label: "Scrobbling",
+              title: displayTitle,
+              imageUrl: data.image || "/assets/img/logo-mini.png",
+              expiresAt: null,
+              showEqualizer: true,
+              showImage: true,
+              lastUpdated: Date.now(),
+              isScrobbling: true
+            });
+          }
+        } else {
+          if (currentTrackRef.current !== "") {
+            currentTrackRef.current = "";
+            if (!isPoll) {
+              setSettings({
+                ...defaultSettings,
+                lastUpdated: Date.now(),
+                isScrobbling: false
+              });
+            }
+          }
         }
       }
     } catch (error) {
@@ -89,6 +99,7 @@ export const useNowPlayingSettings = () => {
         
         if (data.showEqualizer === undefined) data.showEqualizer = true;
         if (data.showImage === undefined) data.showImage = true;
+        if (data.lastfmEnabled === undefined) data.lastfmEnabled = true;
         
         const serverLastUpdated = data.lastUpdated || 0;
 
@@ -117,19 +128,22 @@ export const useNowPlayingSettings = () => {
       fetchSettings(true);
     }, 7000);
 
-    let lastfmInterval: ReturnType<typeof setInterval>;
-    if (settings.lastfmEnabled !== false) {
-      lastfmInterval = setInterval(() => {
-        fetchLastfm(true);
-      }, 10000);
-      lastfmPollIntervalRef.current = lastfmInterval;
-    }
+    let fastCount = 0;
+    const fastRefreshInterval = setInterval(() => {
+      fastCount++;
+      fetchLastfm(true);
+      if (fastCount >= FAST_REFRESH_COUNT - 1) {
+        clearInterval(fastRefreshInterval);
+        startLastfmPolling(SLOW_REFRESH_INTERVAL);
+      }
+    }, FAST_REFRESH_INTERVAL);
 
     return () => {
       clearInterval(interval);
-      if (lastfmInterval) clearInterval(lastfmInterval);
+      clearInterval(fastRefreshInterval);
+      if (lastfmIntervalRef.current) clearInterval(lastfmIntervalRef.current);
     };
-  }, [settings.lastfmEnabled]);
+  }, []);
 
   const verifyPassword = async (password: string) => {
     const response = await fetch("/debug", {
