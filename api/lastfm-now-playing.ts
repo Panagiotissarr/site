@@ -70,13 +70,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const album = typeof track.album === "string" ? track.album : (track.album?.["#text"] || "");
     let image = "";
 
-    if (track.image && Array.isArray(track.image)) {
-      for (const size of ["extralarge", "large", "medium", "small"]) {
-        const img = track.image.find((img: any) => img.size === size);
-        if (img && img["#text"]) {
-          image = img["#text"];
-          break;
+    if (track.image) {
+      if (Array.isArray(track.image)) {
+        for (const size of ["extralarge", "large", "medium", "small"]) {
+          const img = track.image.find((img: any) => img.size === size);
+          if (img && img["#text"]) {
+            image = img["#text"];
+            break;
+          }
         }
+      } else if (typeof track.image === "object" && track.image["#text"]) {
+        image = track.image["#text"];
+      } else if (typeof track.image === "string") {
+        image = track.image;
       }
     }
 
