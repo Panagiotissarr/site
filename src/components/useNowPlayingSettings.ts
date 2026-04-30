@@ -15,8 +15,8 @@ export type NowPlayingSettings = {
 
 const defaultSettings: NowPlayingSettings = {
   enabled: true,
-  label: "Now playing",
-  title: "Ambient focus mix",
+  label: "Loading",
+  title: "...",
   imageUrl: "/assets/img/logo-mini.png",
   expiresAt: null,
   showEqualizer: true,
