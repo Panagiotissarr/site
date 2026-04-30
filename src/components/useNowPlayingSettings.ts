@@ -146,7 +146,7 @@ export const useNowPlayingSettings = () => {
       if (isLeaderRef.current) {
         fetchLastfm();
       }
-    }, 10000);
+    }, 5000);
 
     const leaderCheckInterval = setInterval(() => {
       if (isLeaderRef.current) {
