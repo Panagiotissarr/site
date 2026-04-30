@@ -122,6 +122,12 @@ export const IntroSection: React.FC = () => {
             >
               {settings.isScrobbling ? (
                 <>
+                  <img
+                    src={settings.imageUrl}
+                    alt="Album artwork"
+                    className="size-10 rounded-2xl border border-white/10 bg-zinc-800/60 object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
                   <div className="flex flex-col">
                     <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
                       Now listening to
