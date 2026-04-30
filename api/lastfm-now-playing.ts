@@ -18,12 +18,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const debug = req.query.debug === "1";
+
     const params = new URLSearchParams({
       method: "user.getrecenttracks",
       user: LASTFM_USERNAME,
       api_key: LASTFM_API_KEY,
       format: "json",
       limit: "1",
+      extended: "1",
     });
 
     const response = await fetch(`${LASTFM_API_URL}?${params.toString()}`);
@@ -33,18 +36,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const data = await response.json();
-    const tracks = data.recenttracks?.track;
+
+    if (!data.recenttracks) {
+      console.error("Unexpected Last.fm response:", JSON.stringify(data).slice(0, 500));
+      return res.status(200).json({ nowPlaying: false });
+    }
+
+    const tracks = data.recenttracks.track;
+    const attrs = data.recenttracks["@attr"] || {};
+    const totalPages = attrs.totalPages || 0;
+    const total = attrs.total || 0;
 
     if (!tracks || tracks.length === 0) {
       return res.status(200).json({ nowPlaying: false });
     }
 
     const track = tracks[0];
-    const isNowPlaying = track["@attr"]?.nowplaying === "true";
+    const trackAttrs = track["@attr"] || {};
+    const isNowPlaying = trackAttrs.nowplaying === "true" || track.nowplaying === true || track.nowplaying === "true";
 
     if (!isNowPlaying) {
-      return res.status(200).json({ nowPlaying: false });
+      return res.status(200).json({ nowPlaying: false, debug: { totalPages, total } });
     }
+
+    console.log("Last.fm response - nowPlaying:", isNowPlaying, "track:", track.name, "artist:", track.artist?.["#text"]);
 
     const artist = track.artist?.["#text"] || "Unknown Artist";
     const title = track.name || "Unknown Track";
@@ -56,6 +71,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const mediumImage = track.image.find((img: any) => img.size === "large");
       const originalImage = track.image.find((img: any) => img.size === "medium");
       image = largeImage?.["#text"] || mediumImage?.["#text"] || originalImage?.["#text"] || "";
+    }
+
+    if (debug) {
+      return res.status(200).json({ nowPlaying: isNowPlaying, rawData: data });
     }
 
     return res.status(200).json({
