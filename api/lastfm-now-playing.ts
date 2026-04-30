@@ -31,26 +31,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const data = await response.json();
 
-    if (!data.recenttracks) {
-      console.error("Unexpected Last.fm response:", JSON.stringify(data).slice(0, 500));
+    if (!data.recenttracks?.track?.length) {
       return res.status(200).json({ nowPlaying: false });
     }
 
-    const tracks = data.recenttracks.track;
-    const attrs = data.recenttracks["@attr"] || {};
-    const totalPages = attrs.totalPages || 0;
-    const total = attrs.total || 0;
-
-    if (!tracks || tracks.length === 0) {
-      return res.status(200).json({ nowPlaying: false });
-    }
-
-    const track = tracks[0];
+    const track = data.recenttracks.track[0];
     const trackAttrs = track["@attr"] || {};
     const isNowPlaying = trackAttrs.nowplaying === "true" || track.nowplaying === true || track.nowplaying === "true";
 
     if (!isNowPlaying) {
-      return res.status(200).json({ nowPlaying: false, debug: { totalPages, total } });
+      return res.status(200).json({ nowPlaying: false });
     }
 
     let artist = "Unknown Artist";
