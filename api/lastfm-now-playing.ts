@@ -14,8 +14,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const debug = (req.query as any)?.debug === "1" || (req.query as any)?.debug === 1;
-
     const params = new URLSearchParams({
       method: "user.getrecenttracks",
       user: LASTFM_USERNAME,
@@ -55,8 +53,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ nowPlaying: false, debug: { totalPages, total } });
     }
 
-    console.log("Last.fm raw track data:", JSON.stringify(track).slice(0, 1000));
-
     let artist = "Unknown Artist";
     if (track.artist) {
       if (typeof track.artist === "string") {
@@ -67,36 +63,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const title = track.name || "Unknown Track";
-    const album = typeof track.album === "string" ? track.album : (track.album?.["#text"] || "");
     let image = "";
 
-    if (track.image) {
-      if (Array.isArray(track.image)) {
+    const trackInfoParams = new URLSearchParams({
+      method: "track.getInfo",
+      api_key: LASTFM_API_KEY,
+      format: "json",
+      artist,
+      track: title,
+      autocorrect: "1",
+    });
+
+    const trackInfoResponse = await fetch(`${LASTFM_API_URL}?${trackInfoParams.toString()}`);
+
+    if (trackInfoResponse.ok) {
+      const trackInfoData = await trackInfoResponse.json();
+      if (trackInfoData.track?.album?.image) {
         for (const size of ["extralarge", "large", "medium", "small"]) {
-          const img = track.image.find((img: any) => img.size === size);
+          const img = trackInfoData.track.album.image.find((img: any) => img.size === size);
           if (img && img["#text"]) {
             image = img["#text"];
             break;
           }
         }
-      } else if (typeof track.image === "object" && track.image["#text"]) {
-        image = track.image["#text"];
-      } else if (typeof track.image === "string") {
-        image = track.image;
       }
-    }
-
-    console.log("Parsed - artist:", artist, "title:", title, "image:", image ? "yes" : "no");
-
-    if (debug) {
-      return res.status(200).json({ nowPlaying: isNowPlaying, rawData: data });
     }
 
     return res.status(200).json({
       nowPlaying: true,
       title,
       artist,
-      album,
       image,
     });
   } catch (error) {
