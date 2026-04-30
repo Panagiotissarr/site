@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const LASTFM_API_KEY = process.env.last_fm_api;
+const LASTFM_API_KEY = process.env.last_fm_api || process.env.LAST_API;
 const LASTFM_USERNAME = process.env.LASTFM_USERNAME;
 const LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/";
 
@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const debug = req.query.debug === "1";
+    const debug = (req.query as any)?.debug === "1" || (req.query as any)?.debug === 1;
 
     const params = new URLSearchParams({
       method: "user.getrecenttracks",
