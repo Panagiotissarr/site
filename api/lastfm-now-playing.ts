@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const LASTFM_API_KEY = process.env.last_fm_api || process.env.LAST_API;
-const LASTFM_USERNAME = process.env.LASTFM_USERNAME;
+const LASTFM_USERNAME = process.env.LASTFM_USERNAME || process.env.LAST_FM_USER;
 const LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -9,12 +9,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!LASTFM_API_KEY) {
-    return res.status(500).json({ error: "Last.fm API key not configured" });
-  }
-
-  if (!LASTFM_USERNAME) {
-    return res.status(500).json({ error: "LASTFM_USERNAME not configured" });
+  if (!LASTFM_API_KEY || !LASTFM_USERNAME) {
+    console.error("Missing env vars - last_fm_api:", !!LASTFM_API_KEY, "LASTFM_USERNAME:", !!LASTFM_USERNAME);
+    return res.status(500).json({
+      error: "Missing environment variables",
+      details: {
+        hasApiKey: !!LASTFM_API_KEY,
+        hasUsername: !!LASTFM_USERNAME
+      }
+    });
   }
 
   try {
