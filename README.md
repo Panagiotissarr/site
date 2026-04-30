@@ -1,6 +1,6 @@
 # Sarris.dev
 
-Personal portfolio and web playground for **Panagiotis Sarris**.
+My Personal portfolio and web playground.
 
 [Live Site](https://sarris.dev)
 
@@ -77,8 +77,4 @@ Open `http://localhost:5173` in your browser.
 
 ## License
 
-This repository is for personal portfolio use. Contact the owner before reusing content/assets.
-
-## Credit
-
-- [Sameerasw](https://sameerasw.com/) for foundational inspiration/code
+This repository is for personal portfolio use. Use any asset just put some credits.
