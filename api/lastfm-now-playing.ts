@@ -55,19 +55,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ nowPlaying: false, debug: { totalPages, total } });
     }
 
-    console.log("Last.fm response - nowPlaying:", isNowPlaying, "track:", track.name, "artist:", track.artist?.["#text"]);
+    console.log("Last.fm raw track data:", JSON.stringify(track).slice(0, 1000));
 
-    const artist = track.artist?.["#text"] || "Unknown Artist";
+    let artist = "Unknown Artist";
+    if (track.artist) {
+      if (typeof track.artist === "string") {
+        artist = track.artist;
+      } else if (typeof track.artist === "object") {
+        artist = track.artist["#text"] || track.artist.name || "Unknown Artist";
+      }
+    }
+
     const title = track.name || "Unknown Track";
-    const album = track.album?.["#text"] || "";
+    const album = typeof track.album === "string" ? track.album : (track.album?.["#text"] || "");
     let image = "";
 
     if (track.image && Array.isArray(track.image)) {
-      const largeImage = track.image.find((img: any) => img.size === "extralarge");
-      const mediumImage = track.image.find((img: any) => img.size === "large");
-      const originalImage = track.image.find((img: any) => img.size === "medium");
-      image = largeImage?.["#text"] || mediumImage?.["#text"] || originalImage?.["#text"] || "";
+      for (const size of ["extralarge", "large", "medium", "small"]) {
+        const img = track.image.find((img: any) => img.size === size);
+        if (img && img["#text"]) {
+          image = img["#text"];
+          break;
+        }
+      }
     }
+
+    console.log("Parsed - artist:", artist, "title:", title, "image:", image ? "yes" : "no");
 
     if (debug) {
       return res.status(200).json({ nowPlaying: isNowPlaying, rawData: data });
