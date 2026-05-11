@@ -68,7 +68,7 @@ Hey there! i am well... Panagiotis! Welcome to my Portfollio.
           data-title="GitHub stats"
         >
           <img
-            src="https://github-readme-stats.vercel.app/api?username=panagiotissarr&show_icons=true&count_private=true&theme=transparent&hide_border=true&hide_title=true"
+            src="https://stats.sarris.dev/api?username=panagiotissarr&show_icons=true&count_private=true&theme=transparent&hide_border=true&hide_title=true"
             alt="GitHub Streak"
             className="max-w-full rounded-magic-out border border-white/10 bg-black/40 p-3"
             data-title="GitHub stats"
