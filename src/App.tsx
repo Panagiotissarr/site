@@ -6,7 +6,6 @@ import { CloudPage } from "./pages/CloudPage";
 import { EdcSetupPage } from "./pages/EdcSetupPage";
 import { WindowsSetupPage } from "./pages/WindowsSetupPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { NowPlayingAdminPage } from "./pages/NowPlayingAdminPage";
 import { useMagicCursor } from "./components/useMagicCursor";
 
 const AppLayout: React.FC = () => {
@@ -36,7 +35,7 @@ const App: React.FC = () => {
           <Route path="/cloud" element={<CloudPage />} />
           <Route path="/edc-setup" element={<EdcSetupPage />} />
           <Route path="/windows" element={<WindowsSetupPage />} />
-          <Route path="/admin" element={<NowPlayingAdminPage />} />
+          {/* Admin moved to admin.sarris.dev */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
