@@ -157,6 +157,10 @@ export const WindowsSetupPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        <p className="text-left text-xs text-zinc-500">
+          &copy; {new Date().getFullYear()} Panagiotis Sarris. All rights reserved.
+        </p>
       </div>
     </div>
   );

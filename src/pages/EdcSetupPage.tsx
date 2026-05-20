@@ -115,6 +115,10 @@ export const EdcSetupPage: React.FC = () => {
             </article>
           ))}
         </section>
+
+        <p className="text-left text-xs text-zinc-500">
+          &copy; {new Date().getFullYear()} Panagiotis Sarris. All rights reserved.
+        </p>
       </div>
     </div>
   );

@@ -160,15 +160,18 @@ export const CloudPage: React.FC = () => {
 
         <footer className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400">
           <span>cloud — reimagined moodboard layout</span>
-          <a
-            href="https://sarris.dev"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-zinc-300 hover:text-white"
-          >
-            <span className="material-symbols-rounded text-xs">arrow_forward</span>
-            More of my projects
-          </a>
+          <div className="flex flex-wrap items-center gap-4">
+            <span>&copy; {new Date().getFullYear()} Panagiotis Sarris. All rights reserved.</span>
+            <a
+              href="https://sarris.dev"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-zinc-300 hover:text-white"
+            >
+              <span className="material-symbols-rounded text-xs">arrow_forward</span>
+              More of my projects
+            </a>
+          </div>
         </footer>
       </div>
     </div>

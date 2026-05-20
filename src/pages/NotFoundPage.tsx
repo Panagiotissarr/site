@@ -52,7 +52,7 @@ export const NotFoundPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(800px_400px_at_10%_10%,rgba(56,189,248,0.18),transparent),radial-gradient(800px_400px_at_90%_90%,rgba(167,139,250,0.18),transparent)]">
+    <div className="relative min-h-screen bg-[radial-gradient(800px_400px_at_10%_10%,rgba(56,189,248,0.18),transparent),radial-gradient(800px_400px_at_90%_90%,rgba(167,139,250,0.18),transparent)]">
       <div className="flex min-h-screen items-center justify-center bg-[url('https://2.gravatar.com/bg/248931595/156d264684691a181023e71ae7b6240a')] bg-cover bg-center px-4">
         <div
           ref={cardRef}
@@ -94,6 +94,9 @@ export const NotFoundPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <p className="absolute bottom-4 left-6 text-xs text-zinc-500">
+        &copy; {new Date().getFullYear()} Panagiotis Sarris. All rights reserved.
+      </p>
     </div>
   );
 };
