@@ -7,7 +7,6 @@ import { EdcSetupPage } from "./pages/EdcSetupPage";
 import { WindowsSetupPage } from "./pages/WindowsSetupPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { useMagicCursor } from "./components/useMagicCursor";
-import { Footer } from "./components/Footer";
 
 const AppLayout: React.FC = () => {
   useMagicCursor();
@@ -23,7 +22,6 @@ const AppLayout: React.FC = () => {
       </div>
       <div id="magic-cursor-text" className="magic-cursor-text"></div>
       <Outlet />
-      <Footer />
     </>
   );
 };

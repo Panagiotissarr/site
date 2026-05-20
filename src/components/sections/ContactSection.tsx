@@ -22,6 +22,9 @@ export const ContactSection: React.FC = () => {
           <span>Send an email</span>
         </a>
       </div>
+      <p className="text-left text-xs text-zinc-500">
+        &copy; {new Date().getFullYear()} Panagiotis Sarris. All rights reserved.
+      </p>
     </section>
   );
 };
