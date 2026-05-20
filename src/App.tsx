@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { PortfolioPage } from "./components/PortfolioPage";
 import { CloudPage } from "./pages/CloudPage";
@@ -7,8 +7,10 @@ import { EdcSetupPage } from "./pages/EdcSetupPage";
 import { WindowsSetupPage } from "./pages/WindowsSetupPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { useMagicCursor } from "./components/useMagicCursor";
+import { Footer } from "./components/Footer";
 
 const AppLayout: React.FC = () => {
+  const { pathname } = useLocation();
   useMagicCursor();
 
   return (
@@ -22,6 +24,7 @@ const AppLayout: React.FC = () => {
       </div>
       <div id="magic-cursor-text" className="magic-cursor-text"></div>
       <Outlet />
+      {pathname !== "/" && <Footer />}
     </>
   );
 };
