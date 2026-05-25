@@ -112,11 +112,6 @@ label {
   }
 }
 
-/* Invert showcase thumbnails */
-.showcase-invert {
-  filter: invert(1);
-}
-
 /* Animated title (uiverse-inspired) */
 .uiverse-title {
   position: relative;

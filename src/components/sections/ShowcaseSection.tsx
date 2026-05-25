@@ -8,8 +8,7 @@ const highlights = [
     description: "A free and open source AI",
     href: "/cloud",
     thumb: "/assets/img/Thums/Cloud.jpeg",
-    preview: "/assets/img/Thums/Cloud-Preview.jpeg",
-    is_inverted: true
+    preview: "/assets/img/Thums/Cloud-Preview.jpeg"
   },
   {
     id: "seal-ai",
@@ -17,8 +16,7 @@ const highlights = [
     description: "An AI companion for your search",
     href: "https://seal.sarris.dev/",
     thumb: "/assets/img/Thums/Seal.jpg",
-    preview: "/assets/img/Thums/Seal.jpg",
-    is_inverted: false
+    preview: "/assets/img/Thums/Seal.jpg"
   },
   {
     id: "edc",
@@ -26,8 +24,7 @@ const highlights = [
     description: "Essentials I carry daily",
     href: "/edc-setup",
     thumb: "/assets/img/Thums/edc.jpeg",
-    preview: "/assets/img/Thums/edc-preview.jpeg",
-    is_inverted: true
+    preview: "/assets/img/Thums/edc-preview.jpeg"
   },
   {
     id: "Windows",
@@ -35,8 +32,7 @@ const highlights = [
     description: "What's on my Surface?",
     href: "/windows",
     thumb: "/assets/img/Thums/Windows.jpeg",
-    preview: "/assets/img/Thums/Windows-Preview.jpeg",
-    is_inverted: true
+    preview: "/assets/img/Thums/Windows-Preview.jpeg"
   },
   {
     id: "bookmarklt",
@@ -44,8 +40,7 @@ const highlights = [
     description: "Save and organize your favorite links",
     href: "https://bookmarklt.lovable.app/",
     thumb: "/assets/img/Thums/Bookmarklt.jpg",
-    preview: "/assets/img/Thums/Bookmarklt.jpg",
-    is_inverted: true
+    preview: "/assets/img/Thums/Bookmarklt.jpg"
   },
   {
     id: "more-github",
@@ -53,8 +48,7 @@ const highlights = [
     description: "Explore my projects",
     href: "https://github.com/panagiotissarr/",
     thumb: "/assets/img/Thums/github.jpeg",
-    preview: "/assets/img/Thums/github.jpeg",
-    is_inverted: true
+    preview: "/assets/img/Thums/github.jpeg"
   }
 ];
 
@@ -76,7 +70,7 @@ export const ShowcaseSection: React.FC = () => {
               <img
                 src={item.thumb}
                 alt={item.title}
-                className={`${item.is_inverted ? "showcase-invert" : ""} h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100`}
+                className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
               <div className="absolute inset-x-3 bottom-3 rounded-magic-out bg-white/15 px-4 py-3 backdrop-blur-lg">
