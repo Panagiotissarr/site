@@ -70,7 +70,7 @@ export const ShowcaseSection: React.FC = () => {
               <img
                 src={item.thumb}
                 alt={item.title}
-                className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
+                className="h-full w-full scale-90 object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
               <div className="absolute inset-x-3 bottom-3 rounded-magic-out bg-white/15 px-4 py-3 backdrop-blur-lg">
