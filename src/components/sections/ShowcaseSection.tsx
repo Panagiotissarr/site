@@ -92,7 +92,7 @@ export const ShowcaseSection: React.FC = () => {
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group relative aspect-square overflow-hidden rounded-magic-out border border-white/15 bg-zinc-900/60 shadow-lg shadow-black/40"
+                className="group relative aspect-square overflow-hidden rounded-magic-out border border-white/15 bg-[#4850E0] shadow-lg shadow-black/40"
                 data-title={item.title}
                 data-preview={item.preview ?? item.thumb}
               >
@@ -106,12 +106,12 @@ export const ShowcaseSection: React.FC = () => {
               key={item.id}
               id={item.id}
               to={item.href}
-              className="group relative aspect-square overflow-hidden rounded-magic-out border border-white/15 bg-zinc-900/60 shadow-lg shadow-black/40"
-              data-title={item.title}
-              data-preview={item.preview ?? item.thumb}
-            >
-              {content}
-            </Link>
+                className="group relative aspect-square overflow-hidden rounded-magic-out border border-white/15 bg-[#4850E0] shadow-lg shadow-black/40"
+                data-title={item.title}
+                data-preview={item.preview ?? item.thumb}
+              >
+                {content}
+              </Link>
           );
         })}
       </div>
