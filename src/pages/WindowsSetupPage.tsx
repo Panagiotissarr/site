@@ -77,7 +77,6 @@ export const WindowsSetupPage: React.FC = () => {
           <div className="rounded-3xl border border-white/15 bg-zinc-900/70 p-5 shadow-md shadow-black/60">
             <h2 className="mb-4 text-lg font-semibold">Device</h2>
             <div className="grid gap-4 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-              </div>
               <div className="flex items-center">
                 <p className="text-sm leading-relaxed text-zinc-200">
                   <span className="font-semibold text-primary">Windows</span>
