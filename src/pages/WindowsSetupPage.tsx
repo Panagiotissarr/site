@@ -53,11 +53,6 @@ export const WindowsSetupPage: React.FC = () => {
         <header className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <img
-                src="/assets/img/Thums/Windows-Preview.jpeg"
-                alt="Windows preview"
-                className="h-14 w-14 rounded-2xl border border-white/20 object-cover"
-              />
               <div className="space-y-1">
                 <h1 className="font-display text-3xl md:text-4xl">
                   <span className="text-primary">Windows</span> Setup
@@ -82,17 +77,6 @@ export const WindowsSetupPage: React.FC = () => {
           <div className="rounded-3xl border border-white/15 bg-zinc-900/70 p-5 shadow-md shadow-black/60">
             <h2 className="mb-4 text-lg font-semibold">Device</h2>
             <div className="grid gap-4 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-              <div className="space-y-3">
-                <img
-                  src="/assets/img/Thums/Windows.jpeg"
-                  alt="Windows device"
-                  className="w-full rounded-2xl border border-white/15 object-cover"
-                />
-                <img
-                  src="/assets/img/Thums/Windows-Preview.jpeg"
-                  alt="Desktop screenshot"
-                  className="w-full rounded-2xl border border-white/15 object-cover"
-                />
               </div>
               <div className="flex items-center">
                 <p className="text-sm leading-relaxed text-zinc-200">
