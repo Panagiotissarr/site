@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { PortfolioPage } from "./components/PortfolioPage";
 import { CloudPage } from "./pages/CloudPage";
 import { EdcSetupPage } from "./pages/EdcSetupPage";
@@ -40,6 +41,7 @@ const App: React.FC = () => {
         </Route>
       </Routes>
       <Analytics />
+      <SpeedInsights />
     </>
   );
 };
