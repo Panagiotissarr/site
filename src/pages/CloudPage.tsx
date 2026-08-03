@@ -13,8 +13,8 @@ const featureTiles = [
   {
     id: "image-support",
     icon: "reply",
-    title: "Image support",
-    description: "Coming never! (Keeping the original playful copy.)",
+    title: "Image generation support",
+    description: "It's here!",
     className: "md:col-span-1 md:row-span-1",
     bgImage: "/assets/img/Thums/Search.jpeg"
   },
@@ -118,7 +118,7 @@ export const CloudPage: React.FC = () => {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-sky-500/15 px-3 py-1 text-xs text-sky-200">
                 <span className="material-symbols-rounded text-sm">bolt</span>
-                All OS supported
+                Cloud got Disccontinued in August 1st of 2026
               </div>
               <h2 className="text-lg font-semibold text-sky-300">
                 A playful open-source AI assistant
@@ -139,7 +139,7 @@ export const CloudPage: React.FC = () => {
                 <span className="material-symbols-rounded text-sm">
                   download
                 </span>
-                Cloud 2.0 (BETA)
+                Cloud 3.0
               </a>
               <a
                 href="https://github.com/panagiotissarr/Cloud"
