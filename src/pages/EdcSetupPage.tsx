@@ -57,7 +57,7 @@ export const EdcSetupPage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <img
-                src="/assets/img/Thums/invert-EDC.png"
+                src="/assets/img/Thums/edc.jpeg"
                 alt="EDC logo"
                 className="h-14 w-14 rounded-2xl border border-white/20 bg-white/10 p-1.5"
               />
