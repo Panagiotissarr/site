@@ -82,7 +82,6 @@ export const EdcSetupPage: React.FC = () => {
         </header>
 
         <section className="relative space-y-8">
-          <div className="pointer-events-none absolute -left-2 top-0 hidden h-full w-20 bg-[url('/assets/img/edc/setup-wire.png')] bg-contain bg-top bg-repeat-y opacity-70 md:block" />
 
           {devices.map((device) => (
             <article
