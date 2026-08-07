@@ -19,11 +19,11 @@ const devices = [
     title: "Apple iPad 9th gen",
     img: "/assets/img/edc/iPad.png",
     specs: [
-      "Specs: Google Pixel 7 (original typo kept playful)",
+      "Specs:",
       "Memory: 3 GB",
       "Storage: 256 GB",
-      "OS: iPadOS 26 - Developer Beta",
-      "Color: Black"
+      "OS: iPadOS 27 - Developer Beta",
+      "Color: Space black"
     ]
   },
   {
