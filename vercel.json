@@ -2,6 +2,13 @@
   "buildCommand": "node ./node_modules/vite/bin/vite.js build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "https://admin.sarris.dev",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/debug",
