@@ -35,7 +35,7 @@ Hey there! i am well... Panagiotis! Welcome to my Portfollio.
             </tr>
             <tr className="border-b border-white/5">
               <td className="py-2 pr-4 font-semibold text-primary">Age</td>
-              <td className="py-2">10</td>
+              <td className="py-2">11</td>
             </tr>
             <tr>
               <td className="py-2 pr-4 font-semibold text-primary">Location</td>
