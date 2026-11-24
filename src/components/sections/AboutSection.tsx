@@ -59,20 +59,6 @@ Hey there! i am well... Panagiotis! Welcome to my Portfollio.
             className="max-w-full rounded-magic-out border border-white/10 bg-black/40 p-2"
           />
         </a>
-
-        <a
-          href="https://git.io/streak-stats"
-          target="_blank"
-          rel="noreferrer"
-          className="hover-state inline-flex w-fit self-center"
-          data-title="GitHub stats"
-        >
-          <img
-            src="https://stats.sarris.dev/api?username=panagiotissarr&show_icons=true&count_private=true&theme=transparent&hide_border=true&hide_title=true"
-            alt="GitHub Streak"
-            className="max-w-full rounded-magic-out border border-white/10 bg-black/40 p-3"
-            data-title="GitHub stats"
-          />
         </a>
       </div>
     </section>
