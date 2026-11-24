@@ -46,20 +46,11 @@ Hey there! i am well... Panagiotis! Welcome to my Portfollio.
       </div>
 
       <div className="flex flex-col gap-6">
-        <a
-          href="https://github.com/panagiotissarr/"
-          target="_blank"
-          rel="noreferrer"
-          className="hover-state inline-flex w-fit self-center"
-          data-title="GitHub"
-        >
           <img
             src={`https://skillicons.dev/icons?i=arch,windows,apple,python,figma,github,obsidian,photoshop,premiere,vercel,vscode,neovim&theme=dark&perline=${isMobile ? "3" : "15"}`}
             alt="Pana's Skills"
             className="max-w-full rounded-magic-out border border-white/10 bg-black/40 p-2"
           />
-        </a>
-        </a>
       </div>
     </section>
   );
