@@ -5,12 +5,16 @@ const LASTFM_USERNAME = "panagiotis2211";
 const LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader("Cache-Control", "no-store");
+
   if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   if (!LASTFM_API_KEY) {
-    return res.status(500).json({ error: "Last.fm API key not configured" });
+    console.error("[lastfm] API key is not configured");
+    return res.status(503).json({ error: "Service unavailable" });
   }
 
   try {
@@ -79,6 +83,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // Only forward a well-formed https image URL; anything else is dropped
+    // so the widget falls back to its local default asset.
+    if (image && (!/^https:\/\/[^\s"'<>\\]+$/i.test(image) || image.length > 2048)) {
+      image = "";
+    }
+
     return res.status(200).json({
       nowPlaying: true,
       title,
@@ -86,7 +96,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       image,
     });
   } catch (error) {
-    console.error("Last.fm API error:", error);
-    return res.status(500).json({ error: "Failed to fetch now playing", details: String(error) });
+    // Message only - never the request URL, which carries the API key.
+    console.error("[lastfm] request failed:", error instanceof Error ? error.message : "unknown");
+    return res.status(500).json({ error: "Failed to fetch now playing" });
   }
 }

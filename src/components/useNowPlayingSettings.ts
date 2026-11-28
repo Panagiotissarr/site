@@ -191,8 +191,7 @@ export const useNowPlayingSettings = () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      const debugInfo = errorData.debug ? ` (Received: ${errorData.debug.receivedLength}, Expected: ${errorData.debug.expectedLength})` : "";
-      throw new Error((errorData.error || "Update failed") + debugInfo);
+      throw new Error(errorData.error || "Update failed");
     }
 
     const data = await response.json();

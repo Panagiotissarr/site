@@ -153,8 +153,8 @@ export const useMagicCursor = () => {
       if (cursorBwLayer) cursorBwLayer.style.transform = transform;
     };
 
-    const darkTarget = { r: 7, g: 7, b: 8 };
-    const lightTarget = { r: 255, g: 255, b: 255 };
+    const darkTarget = { r: 7, g: 7, b: 8, a: 1 };
+    const lightTarget = { r: 255, g: 255, b: 255, a: 1 };
     const channelTolerance = 10;
     const colorDark = "#111111";
     const colorLight = "#ffffff";
@@ -361,13 +361,14 @@ export const useMagicCursor = () => {
         cursorText.style.transform = "scale(1)";
         cursorText.style.backgroundImage = `url(${previewUrl})`;
         cursorText.classList.add("image-view");
-        cursorText.innerHTML = "";
+        cursorText.textContent = "";
       } else if (titleText) {
         cursorText.style.opacity = "1";
         cursorText.style.transform = "scale(1)";
         cursorText.style.backgroundImage = "none";
         cursorText.classList.remove("image-view");
-        cursorText.innerHTML = titleText;
+        // textContent, never innerHTML: data-title values must stay inert.
+        cursorText.textContent = titleText;
       } else {
         cursorText.style.opacity = "0";
         cursorText.style.transform = "scale(0.85)";
