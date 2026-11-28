@@ -215,13 +215,13 @@ export const IntroSection: React.FC = () => {
               ●
             </span>
             <span>
-                Hey there! i am well... Panagiotis! Welcome to my Portfollio.
+                Hey! I am Panagiotis! Welcome to my Portfollio.
             </span>
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2 text-xs text-zinc-400">
             <span className="rounded-full bg-white/5 px-3 py-1">
-              <span className="font-medium text-zinc-200">10 y/o</span> coding
+              <span className="font-medium text-zinc-200">11 y/o</span> coding
               things
             </span>
             <span className="rounded-full bg-white/5 px-3 py-1">
